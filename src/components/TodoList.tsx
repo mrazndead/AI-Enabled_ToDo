@@ -6,7 +6,7 @@ import TodoItem from "@/components/TodoItem";
 interface Todo {
   id: string;
   title: string;
-  category: 'Work' | 'Personal' | 'Family';
+  category: 'Work' | 'Personal' | 'Shopping';
   time?: string;
   completed: boolean;
   completionTime?: string;

@@ -9,13 +9,13 @@ import { format } from "date-fns";
 interface Todo {
   id: string;
   title: string;
-  category: 'Work' | 'Personal' | 'Family';
+  category: 'Work' | 'Personal' | 'Shopping'; // Updated categories
   time?: string;
   completed: boolean;
   completionTime?: string;
 }
 
-type CategoryFilter = 'All' | 'Work' | 'Personal' | 'Family';
+type CategoryFilter = 'All' | 'Work' | 'Personal' | 'Shopping'; // Updated categories
 
 const initialTodos: Todo[] = [
   {
@@ -28,7 +28,7 @@ const initialTodos: Todo[] = [
   {
     id: "2",
     title: "Grocery Shopping",
-    category: "Personal",
+    category: "Shopping", // Changed category
     time: "5:00 PM",
     completed: false,
   },
@@ -41,8 +41,14 @@ const initialTodos: Todo[] = [
   },
   {
     id: "4",
-    title: "Call Mom",
-    category: "Family",
+    title: "Buy new shoes",
+    category: "Shopping",
+    completed: false,
+  },
+  {
+    id: "5",
+    title: "Read book chapter",
+    category: "Personal",
     completed: false,
   },
 ];
@@ -121,7 +127,7 @@ const Index = () => {
           <FilterButton category="All" />
           <FilterButton category="Work" />
           <FilterButton category="Personal" />
-          <FilterButton category="Family" />
+          <FilterButton category="Shopping" />
         </div>
         
         {/* Today's Tasks Header */}

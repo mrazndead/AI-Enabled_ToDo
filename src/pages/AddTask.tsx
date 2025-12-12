@@ -3,106 +3,153 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { X, Calendar, Tag, Plus } from "lucide-react";
 import { showSuccess } from "@/utils/toast";
+import TaskDetailItem from "@/components/TaskDetailItem";
 
-type Category = 'Work' | 'Personal' | 'Family';
+type Category = 'Work' | 'Personal' | 'Shopping';
+
+const categoryColors: Record<Category, string> = {
+  Work: "bg-blue-600/20 text-blue-400",
+  Personal: "bg-pink-600/20 text-pink-400",
+  Shopping: "bg-green-600/20 text-green-400",
+};
 
 const AddTask = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState<Category>('Work');
+  const [category, setCategory] = useState<Category | 'None'>('None');
+  const [dueDate, setDueDate] = useState("Today"); // Simplified state for now
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!title.trim()) return;
+
     // Simulate saving the task
-    console.log("Task saved:", { title, description, category });
+    console.log("Task saved:", { title, description, category, dueDate });
     showSuccess(`Task "${title}" added!`);
-    
-    // Reset form
-    setTitle("");
-    setDescription("");
     
     // Navigate back to home
     navigate("/");
   };
 
+  const handleCategorySelect = (cat: Category) => {
+    setCategory(cat);
+  };
+
+  const QuickTagButton: React.FC<{ tag: Category }> = ({ tag }) => {
+    const colorClass = categoryColors[tag];
+    const isActive = category === tag;
+    
+    return (
+      <Button
+        variant="outline"
+        onClick={() => handleCategorySelect(tag)}
+        className={`rounded-full px-4 py-2 h-auto text-sm font-medium transition-colors 
+          ${isActive 
+            ? `${colorClass} border-2 border-opacity-50` 
+            : "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
+          }
+        `}
+      >
+        <span className={`h-2 w-2 rounded-full mr-2 ${tag === 'Work' ? 'bg-blue-400' : tag === 'Personal' ? 'bg-pink-400' : tag === 'Shopping' ? 'bg-green-400' : ''}`}></span>
+        {tag}
+      </Button>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-[#101827] text-white">
-      <div className="max-w-md mx-auto px-4 py-8">
-        <header className="flex items-center mb-8">
-          <Link to="/">
-            <Button variant="ghost" size="icon" className="mr-4 text-gray-300 hover:bg-gray-800">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <h1 className="text-2xl font-bold text-white">Add New Task</h1>
-        </header>
+      
+      {/* Fixed Header */}
+      <header className="sticky top-0 z-20 flex items-center justify-between p-4 bg-[#101827] border-b border-gray-800/50">
+        <Link to="/">
+          <Button variant="ghost" size="icon" className="text-gray-300 hover:bg-gray-800">
+            <X className="h-6 w-6" />
+          </Button>
+        </Link>
+        <h1 className="text-xl font-semibold text-white">Add New Task</h1>
+        <Button 
+          onClick={handleSubmit} 
+          className="bg-blue-600 hover:bg-blue-700 font-semibold"
+          disabled={!title.trim()}
+        >
+          Save
+        </Button>
+      </header>
 
-        <form onSubmit={handleSubmit}>
+      <div className="max-w-md mx-auto px-4 py-6">
+        
+        {/* Task Title Input Card */}
+        <div className="mb-6 p-4 bg-gray-800/50 rounded-xl shadow-lg">
+          <label htmlFor="title" className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+            Task Title
+          </label>
+          <Input
+            id="title"
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder=""
+            required
+            className="h-12 text-xl bg-white text-gray-900 border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-lg placeholder:text-gray-500"
+          />
+        </div>
+
+        {/* Description Input Card */}
+        <div className="mb-6 p-4 bg-gray-800/50 rounded-xl shadow-lg">
+          <label htmlFor="description" className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+            Description
+          </label>
+          <Textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Add details, notes, or subtasks..."
+            rows={4}
+            className="bg-gray-900 border-none text-white placeholder:text-gray-500 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-lg"
+          />
+        </div>
+        
+        {/* Detail Items Container */}
+        <div className="mb-8 bg-gray-800/50 rounded-xl shadow-lg divide-y divide-gray-700/50">
           
-          {/* Title Input */}
-          <div className="mb-6">
-            <label htmlFor="title" className="block text-sm font-medium text-gray-400 mb-2">
-              Task Title
-            </label>
-            <Input
-              id="title"
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="What needs to be done?"
-              required
-              className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
-            />
-          </div>
+          {/* Due Date */}
+          <TaskDetailItem
+            icon={<Calendar className="h-5 w-5 text-white" />}
+            title="Due Date"
+            subtitle="Set a deadline"
+            value={dueDate}
+            iconBgColor="bg-blue-600"
+            onClick={() => console.log("Open Date Picker")}
+          />
 
-          {/* Category Select */}
-          <div className="mb-6">
-            <label htmlFor="category" className="block text-sm font-medium text-gray-400 mb-2">
-              Category
-            </label>
-            <Select value={category} onValueChange={(value: Category) => setCategory(value)}>
-              <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-white">
-                <SelectValue placeholder="Select Category" />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700 text-white">
-                <SelectItem value="Work">Work</SelectItem>
-                <SelectItem value="Personal">Personal</SelectItem>
-                <SelectItem value="Family">Family</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Category */}
+          <TaskDetailItem
+            icon={<Tag className="h-5 w-5 text-white" />}
+            title="Category"
+            subtitle="Organize your tasks"
+            value={category}
+            iconBgColor="bg-purple-600"
+            onClick={() => console.log("Open Category Selector")}
+          />
+        </div>
 
-          {/* Description Input */}
-          <div className="mb-8">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-400 mb-2">
-              Description (Optional)
-            </label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Add details..."
-              rows={4}
-              className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
-            />
-          </div>
-
-          <div className="flex gap-3">
-            <Link to="/" className="flex-1">
-              <Button variant="outline" className="w-full border-gray-700 text-gray-300 hover:bg-gray-800">
-                Cancel
-              </Button>
-            </Link>
-            <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700">
-              Save Task
-            </Button>
-          </div>
-        </form>
+        {/* Quick Tags */}
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
+          Quick Tags
+        </h2>
+        <div className="flex flex-wrap gap-3">
+          <QuickTagButton tag="Work" />
+          <QuickTagButton tag="Personal" />
+          <QuickTagButton tag="Shopping" />
+          
+          <Button variant="outline" size="icon" className="rounded-full h-10 w-10 border-dashed border-gray-700 bg-transparent hover:bg-gray-800 text-gray-400">
+            <Plus className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
     </div>
   );

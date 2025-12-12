@@ -8,7 +8,7 @@ import { Clock } from "lucide-react";
 interface TodoItemProps {
   id: string;
   title: string;
-  category: 'Work' | 'Personal' | 'Family';
+  category: 'Work' | 'Personal' | 'Shopping';
   time?: string;
   completed: boolean;
   completionTime?: string;
@@ -18,8 +18,8 @@ interface TodoItemProps {
 
 const categoryColors: Record<TodoItemProps['category'], string> = {
   Work: "text-blue-400",
-  Personal: "text-green-400",
-  Family: "text-purple-400",
+  Personal: "text-pink-400",
+  Shopping: "text-green-400",
 };
 
 const TodoItem = ({ id, title, category, time, completed, completionTime, onToggle }: TodoItemProps) => {
