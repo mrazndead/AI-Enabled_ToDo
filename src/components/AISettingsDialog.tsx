@@ -17,26 +17,28 @@ const AISettingsDialog: React.FC<AISettingsDialogProps> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    if (googleAIKey) {
-      setInputKey(googleAIKey);
-    }
+    // Sync input field when external key changes (e.g., on initial load or external disable)
+    setInputKey(googleAIKey || '');
   }, [googleAIKey]);
-
-  const handleSave = () => {
-    if (inputKey.trim()) {
-      setGoogleAIKey(inputKey.trim());
-      showSuccess("AI Key saved! Smart features are now enabled.");
-      setIsOpen(false);
-    } else {
-      showError("Please enter a valid Google AI Key.");
-    }
-  };
 
   const handleDisable = () => {
     setGoogleAIKey(null);
     setInputKey('');
     showSuccess("AI features disabled.");
     setIsOpen(false);
+  };
+
+  const handleSave = () => {
+    const trimmedKey = inputKey.trim();
+    
+    if (trimmedKey) {
+      setGoogleAIKey(trimmedKey);
+      showSuccess("AI Key saved! Smart features are now enabled.");
+      setIsOpen(false);
+    } else {
+      // If the user clicks save with an empty field, treat it as disabling.
+      handleDisable();
+    }
   };
 
   return (

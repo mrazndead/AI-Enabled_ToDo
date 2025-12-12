@@ -1,9 +1,21 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Clock } from "lucide-react";
+import { Clock, Trash } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface TodoItemProps {
   id: string;
@@ -22,54 +34,81 @@ const categoryColors: Record<TodoItemProps['category'], string> = {
   Shopping: "text-green-400",
 };
 
-const TodoItem = ({ id, title, category, time, completed, completionTime, onToggle }: TodoItemProps) => {
+const TodoItem = ({ id, title, category, time, completed, completionTime, onToggle, onDelete }: TodoItemProps) => {
   const categoryColorClass = categoryColors[category] || "text-gray-400";
   
   return (
     <Card className={`mb-4 bg-gray-800 border-gray-700 text-white shadow-lg transition-opacity ${completed ? "opacity-80" : ""}`}>
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between">
+      <CardContent className="p-4 flex items-center justify-between">
+        
+        {/* Task Details and Checkbox */}
+        <div className="flex items-start flex-1 cursor-pointer" onClick={() => onToggle(id)}>
+          <Checkbox
+            id={`todo-${id}`}
+            checked={completed}
+            onCheckedChange={() => onToggle(id)}
+            className={`mt-1 mr-4 h-6 w-6 rounded-full border-2 
+              ${completed 
+                ? "border-blue-500 bg-blue-500 text-white" 
+                : "border-gray-500 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
+              }
+            `}
+          />
           
-          {/* Custom Checkbox Area */}
-          <div className="flex items-start flex-1 cursor-pointer" onClick={() => onToggle(id)}>
-            <Checkbox
-              id={`todo-${id}`}
-              checked={completed}
-              onCheckedChange={() => onToggle(id)}
-              className={`mt-1 mr-4 h-6 w-6 rounded-full border-2 
-                ${completed 
-                  ? "border-blue-500 bg-blue-500 text-white" 
-                  : "border-gray-500 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
-                }
-              `}
-            />
+          <div className="flex-1 min-w-0">
+            <h3 className={`text-lg font-medium truncate ${completed ? "line-through text-gray-400" : "text-white"}`}>
+              {title}
+            </h3>
             
-            <div className="flex-1">
-              <h3 className={`text-lg font-medium ${completed ? "line-through text-gray-400" : "text-white"}`}>
-                {title}
-              </h3>
+            <div className="flex items-center text-sm mt-1 space-x-2">
+              <span className={`${categoryColorClass} font-semibold`}>{category}</span>
+              <span className="text-gray-500">•</span>
               
-              <div className="flex items-center text-sm mt-1 space-x-2">
-                <span className={`${categoryColorClass} font-semibold`}>{category}</span>
-                <span className="text-gray-500">•</span>
-                
-                {completed ? (
+              {completed ? (
+                <span className="text-gray-500 flex items-center">
+                  Completed {completionTime}
+                </span>
+              ) : (
+                time && (
                   <span className="text-gray-500 flex items-center">
-                    Completed {completionTime}
+                    <Clock className="h-3 w-3 mr-1" /> {time}
                   </span>
-                ) : (
-                  time && (
-                    <span className="text-gray-500 flex items-center">
-                      <Clock className="h-3 w-3 mr-1" /> {time}
-                    </span>
-                  )
-                )}
-              </div>
+                )
+              )}
             </div>
           </div>
-          
-          {/* Delete functionality is omitted from the visual design but kept in the component for potential use */}
         </div>
+        
+        {/* Delete Button (Confirmation Dialog) */}
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="ml-4 flex-shrink-0 text-gray-500 hover:text-red-500 hover:bg-gray-700/50"
+              onClick={(e) => e.stopPropagation()} // Prevent toggle when clicking delete trigger
+            >
+              <Trash className="h-5 w-5" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent className="bg-gray-900 border-gray-700 text-white">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription className="text-gray-400">
+                This action cannot be undone. This will permanently delete your task: "{title}".
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="bg-gray-700 text-white hover:bg-gray-600 border-none">Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={() => onDelete(id)}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );

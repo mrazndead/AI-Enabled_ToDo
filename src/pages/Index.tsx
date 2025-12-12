@@ -7,7 +7,8 @@ import DailyGoalsCard from "@/components/DailyGoalsCard";
 import { format } from "date-fns";
 import AISettingsDialog from "@/components/AISettingsDialog";
 import { useAI } from "@/context/AIContext";
-import { useLocalStorage } from "@/hooks/use-local-storage"; // Import the new hook
+import { useLocalStorage } from "@/hooks/use-local-storage";
+import { getGreeting } from "@/lib/utils"; // Import getGreeting
 
 interface Todo {
   id: string;
@@ -83,6 +84,7 @@ const Index = () => {
   const completedTasks = todos.filter(t => t.completed).length;
   const totalTasks = todos.length;
   const todayDate = format(new Date(), 'EEEE, MMM dd');
+  const greeting = getGreeting(); // Get dynamic greeting
   
   const filteredTodos = todos.filter(todo => 
     activeFilter === 'All' || todo.category === activeFilter
@@ -115,7 +117,7 @@ const Index = () => {
         {/* Header */}
         <header className="mb-8 flex justify-between items-start">
           <div>
-            <h1 className="text-4xl font-bold mb-1">Good Morning</h1>
+            <h1 className="text-4xl font-bold mb-1">{greeting}</h1>
             <p className="text-gray-400 text-md">{todayDate}</p>
           </div>
           
