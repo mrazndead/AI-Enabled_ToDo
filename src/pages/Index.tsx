@@ -1,17 +1,17 @@
-// Update this page (the content is just a fallback if you fail to update the page)
-
+// Update this page to include the TodoList component
 import { MadeWithDyad } from "@/components/made-with-dyad";
+import TodoList from "@/components/TodoList";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">
-          Start building your amazing project here!
-        </p>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
+      <div className="w-full max-w-md">
+        <h1 className="text-4xl font-bold mb-6 text-center">My Todo App</h1>
+        <TodoList />
+        <div className="mt-8">
+          <MadeWithDyad />
+        </div>
       </div>
-      <MadeWithDyad />
     </div>
   );
 };
