@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Link, useNavigate } from "react-router-dom";
-import { X, Calendar, Tag, Plus } from "lucide-react";
-import { showSuccess } from "@/utils/toast";
+import { X, Calendar, Tag, Plus, Brain } from "lucide-react";
+import { showSuccess, showLoading, dismissToast } from "@/utils/toast";
 import TaskDetailItem from "@/components/TaskDetailItem";
+import { useAITasks } from "@/hooks/use-ai-tasks";
 
 type Category = 'Work' | 'Personal' | 'Shopping';
 
@@ -21,6 +22,7 @@ const AddTask = () => {
   const [category, setCategory] = useState<Category | 'None'>('None');
   const [dueDate, setDueDate] = useState("Today"); // Simplified state for now
   const navigate = useNavigate();
+  const { aiEnabled, categorizeAndCleanTask } = useAITasks();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +39,24 @@ const AddTask = () => {
 
   const handleCategorySelect = (cat: Category) => {
     setCategory(cat);
+  };
+
+  const handleAICategorization = async () => {
+    if (!title.trim() && !description.trim()) return;
+
+    const loadingToastId = showLoading("Analyzing task with AI...");
+    
+    try {
+      const result = await categorizeAndCleanTask(title, description);
+      
+      if (result) {
+        setTitle(result.cleanedTitle);
+        setCategory(result.suggestedCategory);
+        showSuccess("AI analysis complete: Title cleaned and category suggested!");
+      }
+    } finally {
+      dismissToast(loadingToastId);
+    }
   };
 
   const QuickTagButton: React.FC<{ tag: Category }> = ({ tag }) => {
@@ -113,6 +133,21 @@ const AddTask = () => {
           />
         </div>
         
+        {/* AI Button */}
+        {aiEnabled && (
+          <div className="mb-6">
+            <Button 
+              onClick={handleAICategorization} 
+              variant="outline" 
+              className="w-full bg-gray-800 border-gray-700 text-blue-400 hover:bg-gray-700"
+              disabled={!title.trim() && !description.trim()}
+            >
+              <Brain className="h-4 w-4 mr-2" />
+              Analyze & Categorize with AI
+            </Button>
+          </div>
+        )}
+
         {/* Detail Items Container */}
         <div className="mb-8 bg-gray-800/50 rounded-xl shadow-lg divide-y divide-gray-700/50">
           

@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Brain } from "lucide-react";
 import { Link } from "react-router-dom";
 import TodoList from "@/components/TodoList";
 import DailyGoalsCard from "@/components/DailyGoalsCard";
 import { format } from "date-fns";
+import AISettingsDialog from "@/components/AISettingsDialog";
+import { useAI } from "@/context/AIContext";
 
 interface Todo {
   id: string;
@@ -56,6 +58,7 @@ const initialTodos: Todo[] = [
 const Index = () => {
   const [todos, setTodos] = useState<Todo[]>(initialTodos);
   const [activeFilter, setActiveFilter] = useState<CategoryFilter>('All');
+  const { aiEnabled } = useAI();
 
   const handleToggle = (id: string) => {
     setTodos(
@@ -108,9 +111,27 @@ const Index = () => {
       <div className="max-w-md mx-auto px-4 py-12">
         
         {/* Header */}
-        <header className="mb-8">
-          <h1 className="text-4xl font-bold mb-1">Good Morning</h1>
-          <p className="text-gray-400 text-md">{todayDate}</p>
+        <header className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-4xl font-bold mb-1">Good Morning</h1>
+            <p className="text-gray-400 text-md">{todayDate}</p>
+          </div>
+          
+          <AISettingsDialog>
+            <Button 
+              variant={aiEnabled ? "default" : "outline"} 
+              size="sm" 
+              className={`h-8 px-3 rounded-full text-xs font-semibold transition-colors 
+                ${aiEnabled 
+                  ? "bg-green-600 hover:bg-green-700 text-white" 
+                  : "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
+                }
+              `}
+            >
+              <Brain className="h-4 w-4 mr-1" />
+              {aiEnabled ? 'AI Enabled' : 'Enable AI'}
+            </Button>
+          </AISettingsDialog>
         </header>
 
         {/* Daily Goals Card */}
