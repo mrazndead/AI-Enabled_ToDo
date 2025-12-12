@@ -6,8 +6,10 @@ import TodoItem from "@/components/TodoItem";
 interface Todo {
   id: string;
   title: string;
-  description: string;
+  category: 'Work' | 'Personal' | 'Family';
+  time?: string;
   completed: boolean;
+  completionTime?: string;
 }
 
 interface TodoListProps {
@@ -19,21 +21,23 @@ interface TodoListProps {
 const TodoList = ({ todos, onToggle, onDelete }: TodoListProps) => {
   if (todos.length === 0) {
     return (
-      <div className="text-center py-8">
-        <p className="text-gray-500">No tasks yet. Add your first task!</p>
+      <div className="text-center py-8 text-gray-400">
+        <p>No tasks yet. Add your first task!</p>
       </div>
     );
   }
 
   return (
-    <div className="mt-6">
+    <div className="mt-4 space-y-3">
       {todos.map((todo) => (
         <TodoItem
           key={todo.id}
           id={todo.id}
           title={todo.title}
-          description={todo.description}
+          category={todo.category}
+          time={todo.time}
           completed={todo.completed}
+          completionTime={todo.completionTime}
           onToggle={onToggle}
           onDelete={onDelete}
         />

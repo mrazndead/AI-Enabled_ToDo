@@ -1,36 +1,66 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import TodoList from "@/components/TodoList";
+import DailyGoalsCard from "@/components/DailyGoalsCard";
+import { format } from "date-fns";
 
 interface Todo {
   id: string;
   title: string;
-  description: string;
+  category: 'Work' | 'Personal' | 'Family';
+  time?: string;
   completed: boolean;
+  completionTime?: string;
 }
 
+type CategoryFilter = 'All' | 'Work' | 'Personal' | 'Family';
+
+const initialTodos: Todo[] = [
+  {
+    id: "1",
+    title: "Review Q3 Design Mockups",
+    category: "Work",
+    time: "10:00 AM",
+    completed: false,
+  },
+  {
+    id: "2",
+    title: "Grocery Shopping",
+    category: "Personal",
+    time: "5:00 PM",
+    completed: false,
+  },
+  {
+    id: "3",
+    title: "Morning Standup",
+    category: "Work",
+    completed: true,
+    completionTime: "9:30 AM",
+  },
+  {
+    id: "4",
+    title: "Call Mom",
+    category: "Family",
+    completed: false,
+  },
+];
+
 const Index = () => {
-  const [todos, setTodos] = useState<Todo[]>([
-    {
-      id: "1",
-      title: "Buy groceries",
-      description: "Milk, bread, eggs, fruits",
-      completed: false,
-    },
-    {
-      id: "2",
-      title: "Finish project",
-      description: "Complete the React application",
-      completed: true,
-    },
-  ]);
+  const [todos, setTodos] = useState<Todo[]>(initialTodos);
+  const [activeFilter, setActiveFilter] = useState<CategoryFilter>('All');
 
   const handleToggle = (id: string) => {
     setTodos(
       todos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+        todo.id === id
+          ? { 
+              ...todo, 
+              completed: !todo.completed,
+              completionTime: !todo.completed ? format(new Date(), 'h:mm a') : undefined
+            } 
+          : todo
       )
     );
   };
@@ -38,37 +68,82 @@ const Index = () => {
   const handleDelete = (id: string) => {
     setTodos(todos.filter((todo) => todo.id !== id));
   };
+  
+  const completedTasks = todos.filter(t => t.completed).length;
+  const totalTasks = todos.length;
+  const todayDate = format(new Date(), 'EEEE, MMM dd');
+  
+  const filteredTodos = todos.filter(todo => 
+    activeFilter === 'All' || todo.category === activeFilter
+  );
+  
+  const FilterButton: React.FC<{ category: CategoryFilter }> = ({ category }) => {
+    const isActive = activeFilter === category;
+    return (
+      <Button
+        variant={isActive ? "default" : "secondary"}
+        onClick={() => setActiveFilter(category)}
+        className={`rounded-full px-4 py-2 text-sm font-medium transition-colors h-auto
+          ${isActive 
+            ? "bg-blue-600 hover:bg-blue-700 text-white" 
+            : "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700"
+          }
+        `}
+      >
+        {category}
+      </Button>
+    );
+  };
+
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-md mx-auto px-4 py-8">
-        <header className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">My Tasks</h1>
-          <Link to="/add-task">
-            <Button size="icon" className="rounded-full">
-              <PlusCircle className="h-5 w-5" />
-            </Button>
-          </Link>
+    // Apply dark background to match the design
+    <div className="min-h-screen bg-[#101827] text-white"> 
+      <div className="max-w-md mx-auto px-4 py-12">
+        
+        {/* Header */}
+        <header className="mb-8">
+          <h1 className="text-4xl font-bold mb-1">Good Morning</h1>
+          <p className="text-gray-400 text-md">{todayDate}</p>
         </header>
 
-        <div className="mb-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-gray-700">
-              Today <span className="text-gray-500 text-sm">({todos.filter(t => !t.completed).length})</span>
-            </h2>
-          </div>
+        {/* Daily Goals Card */}
+        <div className="mb-8">
+          <DailyGoalsCard 
+            totalTasks={totalTasks} 
+            completedTasks={completedTasks} 
+            streak={3} 
+          />
         </div>
 
+        {/* Category Filters */}
+        <div className="flex space-x-3 overflow-x-auto pb-4 whitespace-nowrap scrollbar-hide">
+          <FilterButton category="All" />
+          <FilterButton category="Work" />
+          <FilterButton category="Personal" />
+          <FilterButton category="Family" />
+        </div>
+        
+        {/* Today's Tasks Header */}
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mt-4 mb-2">
+          Today's Tasks
+        </h2>
+
+        {/* Todo List */}
         <TodoList
-          todos={todos}
+          todos={filteredTodos}
           onToggle={handleToggle}
           onDelete={handleDelete}
         />
 
-        <div className="fixed bottom-6 right-6">
+        {/* Floating Action Button (FAB) */}
+        <div className="fixed bottom-6 right-6 z-10">
           <Link to="/add-task">
-            <Button size="icon" className="rounded-full w-14 h-14 shadow-lg">
-              <PlusCircle className="h-6 w-6" />
+            <Button 
+              size="icon" 
+              className="rounded-full w-14 h-14 shadow-xl bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus className="h-6 w-6" />
             </Button>
           </Link>
         </div>
