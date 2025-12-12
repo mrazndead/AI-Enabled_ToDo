@@ -16,6 +16,19 @@ const categoryColors: Record<Category, string> = {
   Shopping: "bg-green-600/20 text-green-400",
 };
 
+// Helper function to read/write tasks directly to localStorage
+const getTasksFromStorage = () => {
+  if (typeof window === 'undefined') return [];
+  const item = localStorage.getItem('dyad-todo-tasks');
+  return item ? JSON.parse(item) : [];
+};
+
+const saveTasksToStorage = (tasks: any[]) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('dyad-todo-tasks', JSON.stringify(tasks));
+  }
+};
+
 const AddTask = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -24,14 +37,27 @@ const AddTask = () => {
   const navigate = useNavigate();
   const { aiEnabled, categorizeAndCleanTask } = useAITasks();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim()) return;
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) return;
 
-    // Simulate saving the task
-    console.log("Task saved:", { title, description, category, dueDate });
-    showSuccess(`Task "${title}" added!`);
+    const newTask = {
+      id: Date.now().toString(), // Simple unique ID generation
+      title: trimmedTitle,
+      description: description.trim(),
+      category: category === 'None' ? 'Personal' : category,
+      time: undefined, // Time setting is not implemented yet
+      completed: false,
+      completionTime: undefined,
+    };
+
+    // Read existing tasks, add new task, and save back
+    const existingTasks = getTasksFromStorage();
+    saveTasksToStorage([newTask, ...existingTasks]);
+    
+    showSuccess(`Task "${trimmedTitle}" added!`);
     
     // Navigate back to home
     navigate("/");

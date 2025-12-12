@@ -7,6 +7,7 @@ import DailyGoalsCard from "@/components/DailyGoalsCard";
 import { format } from "date-fns";
 import AISettingsDialog from "@/components/AISettingsDialog";
 import { useAI } from "@/context/AIContext";
+import { useLocalStorage } from "@/hooks/use-local-storage"; // Import the new hook
 
 interface Todo {
   id: string;
@@ -56,7 +57,8 @@ const initialTodos: Todo[] = [
 ];
 
 const Index = () => {
-  const [todos, setTodos] = useState<Todo[]>(initialTodos);
+  // Use useLocalStorage to persist todos
+  const [todos, setTodos] = useLocalStorage<Todo[]>('dyad-todo-tasks', initialTodos);
   const [activeFilter, setActiveFilter] = useState<CategoryFilter>('All');
   const { aiEnabled } = useAI();
 
