@@ -106,6 +106,31 @@ const AddTask = () => {
     ? format(dueDate, "MMM dd, yyyy") 
     : "Set a date";
 
+  // Custom trigger component for the date picker popover
+  // This avoids conflicts with TaskDetailItem's internal onClick handler
+  const DatePickerTrigger = () => (
+    <div className={cn(
+      "flex items-center justify-between p-4 rounded-xl cursor-pointer transition-colors",
+      "hover:bg-gray-800/70 border-b border-gray-700/50 last:border-b-0"
+    )}>
+      <div className="flex items-center space-x-4">
+        <div className="p-3 rounded-xl bg-blue-600">
+          <CalendarIcon className="h-5 w-5 text-white" />
+        </div>
+        <div>
+          <p className="text-lg font-medium text-white">Due Date</p>
+          <p className="text-sm text-gray-400">
+            {dueDate ? "Deadline set" : "Set a deadline"}
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center space-x-2 text-gray-400">
+        <span className="font-medium">{dueDateValue}</span>
+        <CalendarIcon className="h-4 w-4" />
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-[#101827] text-white">
       
@@ -162,17 +187,12 @@ const AddTask = () => {
         {/* Detail Items Container */}
         <div className="mb-8 bg-gray-800/50 rounded-xl shadow-lg divide-y divide-gray-700/50">
           
-          {/* Due Date Picker */}
+          {/* Due Date Picker - Using custom trigger */}
           <Popover>
             <PopoverTrigger asChild>
-              {/* Removed onClick handler to allow PopoverTrigger to work */}
-              <TaskDetailItem
-                icon={<CalendarIcon className="h-5 w-5 text-white" />}
-                title="Due Date"
-                subtitle={dueDate ? "Deadline set" : "Set a deadline"}
-                value={dueDateValue}
-                iconBgColor="bg-blue-600"
-              />
+              <div>
+                <DatePickerTrigger />
+              </div>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0 bg-gray-900 border-gray-700 text-white">
               <Calendar
