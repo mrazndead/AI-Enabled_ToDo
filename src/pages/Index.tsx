@@ -4,9 +4,10 @@ import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import TodoList from "@/components/TodoList";
 import DailyGoalsCard from "@/components/DailyGoalsCard";
-import { format } from "date-fns";
+import { format, isToday } from "date-fns";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { getGreeting } from "@/lib/utils";
+import { useStreak } from "@/hooks/useStreak"; // Import useStreak
 
 interface Todo {
   id: string;
@@ -78,6 +79,11 @@ const Index = () => {
     setTodos(todos.filter((todo) => todo.id !== id));
   };
   
+  // Calculate tasks completed today
+  const completedTasksToday = todos.filter(t => t.completed && t.completionTime && isToday(new Date(t.completionTime))).length;
+  
+  const currentStreak = useStreak(completedTasksToday); // Use the new streak hook
+
   const completedTasks = todos.filter(t => t.completed).length;
   const totalTasks = todos.length;
   const todayDate = format(new Date(), 'EEEE, MMM dd');
@@ -118,7 +124,7 @@ const Index = () => {
             <p className="text-gray-400 text-md">{todayDate}</p>
           </div>
           
-          {/* Placeholder for spacing, since the AI button was removed */}
+          {/* Placeholder for spacing */}
           <div className="h-8 w-20" /> 
         </header>
 
@@ -127,7 +133,7 @@ const Index = () => {
           <DailyGoalsCard 
             totalTasks={totalTasks} 
             completedTasks={completedTasks} 
-            streak={3} 
+            streak={currentStreak} // Pass the calculated streak
           />
         </div>
 
