@@ -17,11 +17,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Link } from "react-router-dom"; // Import Link
+import { Category } from '@/hooks/useCategories'; // Import Category type
 
 interface TodoItemProps {
   id: string;
   title: string;
-  category: 'Work' | 'Personal' | 'Shopping';
+  category: Category; // Use dynamic Category type
   time?: string;
   completed: boolean;
   completionTime?: string;
@@ -29,14 +30,22 @@ interface TodoItemProps {
   onDelete: (id: string) => void;
 }
 
-const categoryColors: Record<TodoItemProps['category'], string> = {
+const categoryColors: Record<string, string> = {
   Work: "text-blue-400",
   Personal: "text-pink-400",
   Shopping: "text-green-400",
 };
 
+const getCategoryColorClass = (category: Category) => {
+  if (category in categoryColors) {
+    return categoryColors[category];
+  }
+  // Fallback color for custom categories
+  return "text-purple-400";
+};
+
 const TodoItem = ({ id, title, category, time, completed, completionTime, onToggle, onDelete }: TodoItemProps) => {
-  const categoryColorClass = categoryColors[category] || "text-gray-400";
+  const categoryColorClass = getCategoryColorClass(category);
   
   // Function to handle checkbox click
   const handleCheckboxClick = (e: React.MouseEvent) => {
