@@ -1,14 +1,12 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Brain } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import TodoList from "@/components/TodoList";
 import DailyGoalsCard from "@/components/DailyGoalsCard";
 import { format } from "date-fns";
-import AISettingsDialog from "@/components/AISettingsDialog";
-import { useAI } from "@/context/AIContext";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { getGreeting } from "@/lib/utils"; // Import getGreeting
+import { getGreeting } from "@/lib/utils";
 
 interface Todo {
   id: string;
@@ -61,7 +59,6 @@ const Index = () => {
   // Use useLocalStorage to persist todos
   const [todos, setTodos] = useLocalStorage<Todo[]>('dyad-todo-tasks', initialTodos);
   const [activeFilter, setActiveFilter] = useState<CategoryFilter>('All');
-  const { aiEnabled } = useAI();
 
   const handleToggle = (id: string) => {
     setTodos(
@@ -121,21 +118,8 @@ const Index = () => {
             <p className="text-gray-400 text-md">{todayDate}</p>
           </div>
           
-          <AISettingsDialog>
-            <Button 
-              variant={aiEnabled ? "default" : "outline"} 
-              size="sm" 
-              className={`h-8 px-3 rounded-full text-xs font-semibold transition-colors 
-                ${aiEnabled 
-                  ? "bg-green-600 hover:bg-green-700 text-white" 
-                  : "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
-                }
-              `}
-            >
-              <Brain className="h-4 w-4 mr-1" />
-              {aiEnabled ? 'AI Enabled' : 'Enable AI'}
-            </Button>
-          </AISettingsDialog>
+          {/* Placeholder for spacing, since the AI button was removed */}
+          <div className="h-8 w-20" /> 
         </header>
 
         {/* Daily Goals Card */}
