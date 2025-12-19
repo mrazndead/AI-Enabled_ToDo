@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Clock, Trash } from "lucide-react";
@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Link } from "react-router-dom"; // Import Link
 
 interface TodoItemProps {
   id: string;
@@ -37,16 +38,23 @@ const categoryColors: Record<TodoItemProps['category'], string> = {
 const TodoItem = ({ id, title, category, time, completed, completionTime, onToggle, onDelete }: TodoItemProps) => {
   const categoryColorClass = categoryColors[category] || "text-gray-400";
   
+  // Function to handle checkbox click without triggering navigation
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent the click from bubbling up to the Link
+    onToggle(id);
+  };
+
   return (
     <Card className={`mb-4 bg-gray-800 border-gray-700 text-white shadow-lg transition-opacity ${completed ? "opacity-80" : ""}`}>
       <CardContent className="p-4 flex items-center justify-between">
         
         {/* Task Details and Checkbox */}
-        <div className="flex items-start flex-1 cursor-pointer" onClick={() => onToggle(id)}>
+        <Link to={`/task/${id}`} className="flex items-start flex-1 min-w-0 cursor-pointer">
           <Checkbox
             id={`todo-${id}`}
             checked={completed}
             onCheckedChange={() => onToggle(id)}
+            onClick={handleCheckboxClick} // Use the handler to stop propagation
             className={`mt-1 mr-4 h-6 w-6 rounded-full border-2 
               ${completed 
                 ? "border-blue-500 bg-blue-500 text-white" 
@@ -77,7 +85,7 @@ const TodoItem = ({ id, title, category, time, completed, completionTime, onTogg
               )}
             </div>
           </div>
-        </div>
+        </Link>
         
         {/* Delete Button (Confirmation Dialog) */}
         <AlertDialog>
@@ -86,7 +94,7 @@ const TodoItem = ({ id, title, category, time, completed, completionTime, onTogg
               variant="ghost" 
               size="icon" 
               className="ml-4 flex-shrink-0 text-gray-500 hover:text-red-500 hover:bg-gray-700/50"
-              onClick={(e) => e.stopPropagation()} // Prevent toggle when clicking delete trigger
+              onClick={(e) => e.stopPropagation()} // Prevent navigation when clicking delete trigger
             >
               <Trash className="h-5 w-5" />
             </Button>
