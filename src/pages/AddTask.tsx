@@ -165,13 +165,13 @@ const AddTask = () => {
           {/* Due Date Picker */}
           <Popover>
             <PopoverTrigger asChild>
+              {/* Removed onClick handler to allow PopoverTrigger to work */}
               <TaskDetailItem
                 icon={<CalendarIcon className="h-5 w-5 text-white" />}
                 title="Due Date"
                 subtitle={dueDate ? "Deadline set" : "Set a deadline"}
                 value={dueDateValue}
                 iconBgColor="bg-blue-600"
-                onClick={() => {}} // Popover handles click
               />
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0 bg-gray-900 border-gray-700 text-white">
