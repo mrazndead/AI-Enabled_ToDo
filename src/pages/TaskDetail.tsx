@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import TaskDetailItem from '@/components/TaskDetailItem';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import { format } from 'date-fns';
+import { format, isPast, isToday } from 'date-fns';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { showSuccess } from '@/utils/toast';
 import { Category } from '@/hooks/useCategories'; // Import Category type
@@ -16,6 +16,7 @@ interface Todo {
   description?: string;
   category: Category; // Use dynamic Category type
   time?: string;
+  dueDate?: string; // Added dueDate
   completed: boolean;
   completionTime?: string;
 }
@@ -76,6 +77,23 @@ const TaskDetail: React.FC = () => {
   };
 
   const colorScheme = getCategoryColors(task.category);
+  
+  // Due Date Logic
+  let dueDateValue = "No deadline";
+  let dueDateSubtitle = "Set a deadline";
+  let dueDateIconBg = "bg-gray-600";
+  
+  if (task.dueDate) {
+    const date = new Date(task.dueDate);
+    dueDateValue = format(date, "MMM dd, yyyy");
+    dueDateSubtitle = isToday(date) ? "Due Today" : format(date, 'EEEE');
+    
+    if (isPast(date) && !task.completed) {
+        dueDateIconBg = "bg-red-600"; // Overdue
+    } else {
+        dueDateIconBg = "bg-blue-600";
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#101827] text-white">
@@ -154,13 +172,13 @@ const TaskDetail: React.FC = () => {
         </h3>
         <div className="mb-8 bg-gray-800/50 rounded-xl shadow-lg divide-y divide-gray-700/50">
           
-          {/* Due Date (Simplified to Today for now) */}
+          {/* Due Date */}
           <TaskDetailItem
             icon={<Calendar className="h-5 w-5 text-white" />}
             title="Due Date"
-            subtitle="Set a deadline"
-            value="Today"
-            iconBgColor="bg-blue-600"
+            subtitle={dueDateSubtitle}
+            value={dueDateValue}
+            iconBgColor={dueDateIconBg}
           />
 
           {/* Category */}

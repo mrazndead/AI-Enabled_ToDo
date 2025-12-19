@@ -3,10 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Link, useNavigate } from "react-router-dom";
-import { X, Calendar, Tag, Plus } from "lucide-react";
+import { X, Calendar as CalendarIcon, Tag, Plus } from "lucide-react";
 import { showSuccess } from "@/utils/toast";
 import TaskDetailItem from "@/components/TaskDetailItem";
-import { useCategories, Category } from "@/hooks/useCategories"; // Import useCategories
+import { useCategories, Category } from "@/hooks/useCategories";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 type CategoryState = Category | 'None';
 
@@ -34,7 +38,7 @@ const AddTask = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<CategoryState>('None');
-  const [dueDate, setDueDate] = useState("Today"); // Simplified state for now
+  const [dueDate, setDueDate] = useState<Date | undefined>(undefined); // Change to Date object
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,6 +53,7 @@ const AddTask = () => {
       description: description.trim(),
       category: category === 'None' ? 'Personal' : category,
       time: undefined, // Time setting is not implemented yet
+      dueDate: dueDate ? dueDate.toISOString() : undefined, // Store date as ISO string
       completed: false,
       completionTime: undefined,
     };
@@ -96,6 +101,10 @@ const AddTask = () => {
       </Button>
     );
   };
+  
+  const dueDateValue = dueDate 
+    ? format(dueDate, "MMM dd, yyyy") 
+    : "Set a date";
 
   return (
     <div className="min-h-screen bg-[#101827] text-white">
@@ -153,15 +162,38 @@ const AddTask = () => {
         {/* Detail Items Container */}
         <div className="mb-8 bg-gray-800/50 rounded-xl shadow-lg divide-y divide-gray-700/50">
           
-          {/* Due Date */}
-          <TaskDetailItem
-            icon={<Calendar className="h-5 w-5 text-white" />}
-            title="Due Date"
-            subtitle="Set a deadline"
-            value={dueDate}
-            iconBgColor="bg-blue-600"
-            onClick={() => console.log("Open Date Picker")}
-          />
+          {/* Due Date Picker */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <TaskDetailItem
+                icon={<CalendarIcon className="h-5 w-5 text-white" />}
+                title="Due Date"
+                subtitle={dueDate ? "Deadline set" : "Set a deadline"}
+                value={dueDateValue}
+                iconBgColor="bg-blue-600"
+                onClick={() => {}} // Popover handles click
+              />
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0 bg-gray-900 border-gray-700 text-white">
+              <Calendar
+                mode="single"
+                selected={dueDate}
+                onSelect={setDueDate}
+                initialFocus
+                className="[&_td]:text-white [&_th]:text-gray-400 [&_button]:text-white [&_button:hover]:bg-gray-700"
+              />
+              <div className="p-2 border-t border-gray-700 flex justify-end">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setDueDate(undefined)}
+                  className="text-red-400 hover:bg-gray-700"
+                >
+                  Clear Date
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
 
           {/* Category */}
           <TaskDetailItem
