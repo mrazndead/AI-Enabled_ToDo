@@ -38,9 +38,9 @@ const categoryColors: Record<TodoItemProps['category'], string> = {
 const TodoItem = ({ id, title, category, time, completed, completionTime, onToggle, onDelete }: TodoItemProps) => {
   const categoryColorClass = categoryColors[category] || "text-gray-400";
   
-  // Function to handle checkbox click without triggering navigation
+  // Function to handle checkbox click
   const handleCheckboxClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent the click from bubbling up to the Link
+    e.stopPropagation(); // Ensure this click doesn't affect the parent container if it had a handler
     onToggle(id);
   };
 
@@ -48,21 +48,22 @@ const TodoItem = ({ id, title, category, time, completed, completionTime, onTogg
     <Card className={`mb-4 bg-gray-800 border-gray-700 text-white shadow-lg transition-opacity ${completed ? "opacity-80" : ""}`}>
       <CardContent className="p-4 flex items-center justify-between">
         
-        {/* Task Details and Checkbox */}
-        <Link to={`/task/${id}`} className="flex items-start flex-1 min-w-0 cursor-pointer">
-          <Checkbox
-            id={`todo-${id}`}
-            checked={completed}
-            onCheckedChange={() => onToggle(id)}
-            onClick={handleCheckboxClick} // Use the handler to stop propagation
-            className={`mt-1 mr-4 h-6 w-6 rounded-full border-2 
-              ${completed 
-                ? "border-blue-500 bg-blue-500 text-white" 
-                : "border-gray-500 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
-              }
-            `}
-          />
-          
+        {/* Checkbox (Separate from Link) */}
+        <Checkbox
+          id={`todo-${id}`}
+          checked={completed}
+          onCheckedChange={() => onToggle(id)}
+          onClick={handleCheckboxClick}
+          className={`mt-1 mr-4 h-6 w-6 rounded-full border-2 flex-shrink-0
+            ${completed 
+              ? "border-blue-500 bg-blue-500 text-white" 
+              : "border-gray-500 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
+            }
+          `}
+        />
+        
+        {/* Task Details (Wrapped in Link for navigation) */}
+        <Link to={`/task/${id}`} className="flex-1 min-w-0 cursor-pointer">
           <div className="flex-1 min-w-0">
             <h3 className={`text-lg font-medium truncate ${completed ? "line-through text-gray-400" : "text-white"}`}>
               {title}
@@ -94,7 +95,7 @@ const TodoItem = ({ id, title, category, time, completed, completionTime, onTogg
               variant="ghost" 
               size="icon" 
               className="ml-4 flex-shrink-0 text-gray-500 hover:text-red-500 hover:bg-gray-700/50"
-              onClick={(e) => e.stopPropagation()} // Prevent navigation when clicking delete trigger
+              onClick={(e) => e.stopPropagation()} // Prevent any unintended behavior
             >
               <Trash className="h-5 w-5" />
             </Button>
