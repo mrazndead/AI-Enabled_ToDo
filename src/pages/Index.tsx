@@ -1,24 +1,26 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 import TodoList from "@/components/TodoList";
 import DailyGoalsCard from "@/components/DailyGoalsCard";
 import { format, isToday } from "date-fns";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { getGreeting } from "@/lib/utils";
-import { useStreak } from "@/hooks/useStreak"; // Import useStreak
+import { useStreak } from "@/hooks/useStreak";
+import { useCategories, Category } from "@/hooks/useCategories"; // Import useCategories and Category type
+import CategoryManagerDialog from "@/components/CategoryManagerDialog"; // Import CategoryManagerDialog
 
 interface Todo {
   id: string;
   title: string;
-  category: 'Work' | 'Personal' | 'Shopping'; // Updated categories
+  category: Category; // Use dynamic Category type
   time?: string;
   completed: boolean;
   completionTime?: string;
 }
 
-type CategoryFilter = 'All' | 'Work' | 'Personal' | 'Shopping'; // Updated categories
+type CategoryFilter = 'All' | Category;
 
 const initialTodos: Todo[] = [
   {
@@ -31,7 +33,7 @@ const initialTodos: Todo[] = [
   {
     id: "2",
     title: "Grocery Shopping",
-    category: "Shopping", // Changed category
+    category: "Shopping",
     time: "5:00 PM",
     completed: false,
   },
@@ -57,6 +59,7 @@ const initialTodos: Todo[] = [
 ];
 
 const Index = () => {
+  const { categories } = useCategories(); // Use the categories hook
   // Use useLocalStorage to persist todos
   const [todos, setTodos] = useLocalStorage<Todo[]>('dyad-todo-tasks', initialTodos);
   const [activeFilter, setActiveFilter] = useState<CategoryFilter>('All');
@@ -124,8 +127,12 @@ const Index = () => {
             <p className="text-gray-400 text-md">{todayDate}</p>
           </div>
           
-          {/* Placeholder for spacing */}
-          <div className="h-8 w-20" /> 
+          {/* Category Management Button */}
+          <CategoryManagerDialog>
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:bg-gray-800">
+              <Settings className="h-6 w-6" />
+            </Button>
+          </CategoryManagerDialog>
         </header>
 
         {/* Daily Goals Card */}
@@ -140,9 +147,9 @@ const Index = () => {
         {/* Category Filters */}
         <div className="flex space-x-3 overflow-x-auto pb-4 whitespace-nowrap scrollbar-hide">
           <FilterButton category="All" />
-          <FilterButton category="Work" />
-          <FilterButton category="Personal" />
-          <FilterButton category="Shopping" />
+          {categories.map(category => (
+            <FilterButton key={category} category={category} />
+          ))}
         </div>
         
         {/* Today's Tasks Header */}

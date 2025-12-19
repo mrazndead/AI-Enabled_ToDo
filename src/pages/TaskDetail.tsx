@@ -8,21 +8,31 @@ import { useLocalStorage } from '@/hooks/use-local-storage';
 import { format } from 'date-fns';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { showSuccess } from '@/utils/toast';
+import { Category } from '@/hooks/useCategories'; // Import Category type
 
 interface Todo {
   id: string;
   title: string;
   description?: string;
-  category: 'Work' | 'Personal' | 'Shopping';
+  category: Category; // Use dynamic Category type
   time?: string;
   completed: boolean;
   completionTime?: string;
 }
 
-const categoryColors: Record<Todo['category'], { iconBg: string, text: string }> = {
+// Define colors for default categories, use a fallback for custom ones
+const DEFAULT_CATEGORY_COLORS: Record<string, { iconBg: string, text: string }> = {
   Work: { iconBg: "bg-blue-600", text: "text-blue-400" },
   Personal: { iconBg: "bg-pink-600", text: "text-pink-400" },
   Shopping: { iconBg: "bg-green-600", text: "text-green-400" },
+};
+
+const getCategoryColors = (category: Category) => {
+    if (category in DEFAULT_CATEGORY_COLORS) {
+        return DEFAULT_CATEGORY_COLORS[category];
+    }
+    // Fallback color for custom categories
+    return { iconBg: "bg-purple-600", text: "text-purple-400" };
 };
 
 const TaskDetail: React.FC = () => {
@@ -65,7 +75,7 @@ const TaskDetail: React.FC = () => {
     navigate("/");
   };
 
-  const colorScheme = categoryColors[task.category];
+  const colorScheme = getCategoryColors(task.category);
 
   return (
     <div className="min-h-screen bg-[#101827] text-white">
@@ -159,7 +169,7 @@ const TaskDetail: React.FC = () => {
             title="Category"
             subtitle="Organize your tasks"
             value={task.category}
-            iconBgColor={categoryColors[task.category].iconBg}
+            iconBgColor={colorScheme.iconBg}
           />
           
           {/* Time (if available) */}

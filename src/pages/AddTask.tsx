@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Link, useNavigate } from "react-router-dom";
-import { X, Calendar, Tag, Plus, Brain } from "lucide-react";
-import { showSuccess, showLoading, dismissToast } from "@/utils/toast";
+import { X, Calendar, Tag, Plus } from "lucide-react";
+import { showSuccess } from "@/utils/toast";
 import TaskDetailItem from "@/components/TaskDetailItem";
-import { useAITasks } from "@/hooks/use-ai-tasks";
+import { useCategories, Category } from "@/hooks/useCategories"; // Import useCategories
 
-type Category = 'Work' | 'Personal' | 'Shopping';
+type CategoryState = Category | 'None';
 
 const categoryColors: Record<Category, string> = {
   Work: "bg-blue-600/20 text-blue-400",
@@ -30,12 +30,12 @@ const saveTasksToStorage = (tasks: any[]) => {
 };
 
 const AddTask = () => {
+  const { categories, DEFAULT_CATEGORIES } = useCategories();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState<Category | 'None'>('None');
+  const [category, setCategory] = useState<CategoryState>('None');
   const [dueDate, setDueDate] = useState("Today"); // Simplified state for now
   const navigate = useNavigate();
-  const { aiEnabled, categorizeAndCleanTask } = useAITasks();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,26 +67,17 @@ const AddTask = () => {
     setCategory(cat);
   };
 
-  const handleAICategorization = async () => {
-    if (!title.trim() && !description.trim()) return;
-
-    const loadingToastId = showLoading("Analyzing task with AI...");
-    
-    try {
-      const result = await categorizeAndCleanTask(title, description);
-      
-      if (result) {
-        setTitle(result.cleanedTitle);
-        setCategory(result.suggestedCategory);
-        showSuccess("AI analysis complete: Title cleaned and category suggested!");
-      }
-    } finally {
-      dismissToast(loadingToastId);
+  // Helper to get color class for dynamic categories
+  const getCategoryColorClass = (cat: Category) => {
+    if (cat in categoryColors) {
+      return categoryColors[cat as keyof typeof categoryColors];
     }
+    // Default color for custom tags
+    return "bg-purple-600/20 text-purple-400";
   };
 
   const QuickTagButton: React.FC<{ tag: Category }> = ({ tag }) => {
-    const colorClass = categoryColors[tag];
+    const colorClass = getCategoryColorClass(tag);
     const isActive = category === tag;
     
     return (
@@ -100,7 +91,7 @@ const AddTask = () => {
           }
         `}
       >
-        <span className={`h-2 w-2 rounded-full mr-2 ${tag === 'Work' ? 'bg-blue-400' : tag === 'Personal' ? 'bg-pink-400' : tag === 'Shopping' ? 'bg-green-400' : ''}`}></span>
+        <span className={`h-2 w-2 rounded-full mr-2 ${tag === 'Work' ? 'bg-blue-400' : tag === 'Personal' ? 'bg-pink-400' : tag === 'Shopping' ? 'bg-green-400' : 'bg-purple-400'}`}></span>
         {tag}
       </Button>
     );
@@ -159,21 +150,6 @@ const AddTask = () => {
           />
         </div>
         
-        {/* AI Button */}
-        {aiEnabled && (
-          <div className="mb-6">
-            <Button 
-              onClick={handleAICategorization} 
-              variant="outline" 
-              className="w-full bg-gray-800 border-gray-700 text-blue-400 hover:bg-gray-700"
-              disabled={!title.trim() && !description.trim()}
-            >
-              <Brain className="h-4 w-4 mr-2" />
-              Analyze & Categorize with AI
-            </Button>
-          </div>
-        )}
-
         {/* Detail Items Container */}
         <div className="mb-8 bg-gray-800/50 rounded-xl shadow-lg divide-y divide-gray-700/50">
           
@@ -203,9 +179,9 @@ const AddTask = () => {
           Quick Tags
         </h2>
         <div className="flex flex-wrap gap-3">
-          <QuickTagButton tag="Work" />
-          <QuickTagButton tag="Personal" />
-          <QuickTagButton tag="Shopping" />
+          {categories.map(tag => (
+            <QuickTagButton key={tag} tag={tag} />
+          ))}
           
           <Button variant="outline" size="icon" className="rounded-full h-10 w-10 border-dashed border-gray-700 bg-transparent hover:bg-gray-800 text-gray-400">
             <Plus className="h-5 w-5" />
