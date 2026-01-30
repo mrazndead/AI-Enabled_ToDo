@@ -1,9 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Check, Circle, Calendar, ChevronRight } from "lucide-react";
+import { Check, Calendar, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, isPast, isToday } from "date-fns";
 import { Category } from "@/hooks/useCategories";
+import { motion } from "framer-motion";
 
 interface TodoItemProps {
   todo: {
@@ -28,14 +29,18 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle }) => {
   const accent = categoryAccentColors[todo.category] || "border-purple-500/30 bg-purple-500/5 text-purple-400";
 
   return (
-    <div className="group relative">
+    <motion.div 
+      whileHover={{ scale: 1.01, x: 4 }}
+      className="group relative"
+    >
       <div className={cn(
-        "flex items-center gap-4 p-4 bg-zinc-900/40 border border-zinc-800/60 rounded-2xl transition-all duration-200",
+        "flex items-center gap-4 p-4 bg-zinc-900/40 border border-zinc-800/60 rounded-2xl transition-all duration-300",
         "hover:bg-zinc-900/60 hover:border-zinc-700/60 hover:shadow-lg hover:shadow-black/20",
         todo.completed && "opacity-60"
       )}>
         {/* Checkbox */}
-        <button 
+        <motion.button 
+          whileTap={{ scale: 0.8 }}
           onClick={(e) => {
             e.preventDefault();
             onToggle();
@@ -47,14 +52,22 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle }) => {
               : "border-zinc-700 hover:border-indigo-500"
           )}
         >
-          {todo.completed && <Check className="h-4 w-4 text-white" />}
-        </button>
+          {todo.completed && (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            >
+              <Check className="h-4 w-4 text-white" />
+            </motion.div>
+          )}
+        </motion.button>
 
         {/* Content */}
         <Link to={`/task/${todo.id}`} className="flex-1 min-w-0">
           <div className="flex flex-col gap-1">
             <h3 className={cn(
-              "text-base font-medium transition-all duration-200 truncate",
+              "text-base font-medium transition-all duration-300 truncate",
               todo.completed ? "line-through text-zinc-500" : "text-zinc-100"
             )}>
               {todo.title}
@@ -78,11 +91,9 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle }) => {
           </div>
         </Link>
 
-        <Link to={`/task/${todo.id}`} className="text-zinc-700 group-hover:text-zinc-400 transition-colors">
-          <ChevronRight className="h-5 w-5" />
-        </Link>
+        <ChevronRight className="h-5 w-5 text-zinc-700 group-hover:text-zinc-400 transition-colors" />
       </div>
-    </div>
+    </motion.div>
   );
 };
 

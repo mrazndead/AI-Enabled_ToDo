@@ -3,17 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Link, useNavigate } from "react-router-dom";
-import { X, Calendar as CalendarIcon, Tag, Plus, Check } from "lucide-react";
+import { X, Calendar as CalendarIcon, Plus, Check } from "lucide-react";
 import { showSuccess } from "@/utils/toast";
 import { useCategories, Category } from "@/hooks/useCategories";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { motion } from "framer-motion";
 
 type CategoryState = Category | 'None';
 
-// Helper function to read/write tasks directly to localStorage
 const getTasksFromStorage = () => {
   if (typeof window === 'undefined') return [];
   const item = localStorage.getItem('dyad-todo-tasks');
@@ -54,8 +54,13 @@ const AddTask = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 selection:bg-indigo-500/30">
-      {/* Header */}
+    <motion.div 
+      initial={{ y: "100%" }}
+      animate={{ y: 0 }}
+      exit={{ y: "100%" }}
+      transition={{ type: "spring", damping: 30, stiffness: 300 }}
+      className="min-h-screen bg-[#09090b] text-zinc-100 selection:bg-indigo-500/30"
+    >
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#09090b]/80 border-b border-zinc-800/50">
         <div className="max-w-2xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/">
@@ -64,20 +69,26 @@ const AddTask = () => {
             </Button>
           </Link>
           <h1 className="text-lg font-bold">New Task</h1>
-          <Button 
-            onClick={handleSubmit} 
-            className="bg-indigo-600 hover:bg-indigo-700 rounded-xl px-6 font-semibold"
-            disabled={!title.trim()}
-          >
-            Create
-          </Button>
+          <motion.div whileTap={{ scale: 0.95 }}>
+            <Button 
+              onClick={handleSubmit} 
+              className="bg-indigo-600 hover:bg-indigo-700 rounded-xl px-6 font-semibold"
+              disabled={!title.trim()}
+            >
+              Create
+            </Button>
+          </motion.div>
         </div>
       </header>
 
       <main className="max-w-2xl mx-auto px-6 py-10">
         <div className="space-y-8">
-          {/* Main Input */}
-          <section className="space-y-2">
+          <motion.section 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+            className="space-y-2"
+          >
             <label className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500 ml-1">Task Title</label>
             <Input
               autoFocus
@@ -86,11 +97,14 @@ const AddTask = () => {
               placeholder="What needs to be done?"
               className="bg-transparent border-none text-3xl font-bold h-auto p-0 focus-visible:ring-0 placeholder:text-zinc-800"
             />
-          </section>
+          </motion.section>
 
-          {/* Details Section */}
-          <section className="bg-zinc-900/30 border border-zinc-800/50 rounded-3xl overflow-hidden divide-y divide-zinc-800/50 shadow-xl shadow-black/20">
-            {/* Description */}
+          <motion.section 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-zinc-900/30 border border-zinc-800/50 rounded-3xl overflow-hidden divide-y divide-zinc-800/50 shadow-xl shadow-black/20"
+          >
             <div className="p-6 space-y-2">
               <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-500">
                 <Plus className="h-3 w-3" /> Description
@@ -103,7 +117,6 @@ const AddTask = () => {
               />
             </div>
 
-            {/* Date Picker */}
             <Popover>
               <PopoverTrigger asChild>
                 <button className="w-full flex items-center justify-between p-6 hover:bg-zinc-800/30 transition-colors">
@@ -131,15 +144,21 @@ const AddTask = () => {
                 />
               </PopoverContent>
             </Popover>
-          </section>
+          </motion.section>
 
-          {/* Tags */}
-          <section className="space-y-4">
+          <motion.section 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="space-y-4"
+          >
             <label className="text-xs font-bold uppercase tracking-wider text-zinc-500 ml-1">Category</label>
             <div className="flex flex-wrap gap-2">
               {categories.map((cat) => (
-                <button
+                <motion.button
                   key={cat}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => setCategory(cat)}
                   className={cn(
                     "px-4 py-2.5 rounded-2xl border text-sm font-semibold transition-all duration-200",
@@ -149,13 +168,13 @@ const AddTask = () => {
                   )}
                 >
                   {cat}
-                </button>
+                </motion.button>
               ))}
             </div>
-          </section>
+          </motion.section>
         </div>
       </main>
-    </div>
+    </motion.div>
   );
 };
 
