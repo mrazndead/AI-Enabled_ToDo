@@ -2,11 +2,12 @@
 
 import React from "react";
 import TodoItem from "@/components/TodoItem";
+import { Category } from "@/hooks/useCategories";
 
 interface Todo {
   id: string;
   title: string;
-  category: 'Work' | 'Personal' | 'Shopping';
+  category: Category;
   time?: string;
   completed: boolean;
   completionTime?: string;
@@ -21,8 +22,8 @@ interface TodoListProps {
 const TodoList = ({ todos, onToggle, onDelete }: TodoListProps) => {
   if (todos.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-400">
-        <p>No tasks yet. Add your first task!</p>
+      <div className="text-center py-8 text-white/20">
+        <p className="font-medium">No tasks yet. Add your first task!</p>
       </div>
     );
   }

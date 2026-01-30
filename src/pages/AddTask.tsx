@@ -3,9 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Link, useNavigate } from "react-router-dom";
-import { X, Calendar as CalendarIcon, Tag, Plus } from "lucide-react";
+import { X, Calendar as CalendarIcon, Tag, Plus, Check } from "lucide-react";
 import { showSuccess } from "@/utils/toast";
-import TaskDetailItem from "@/components/TaskDetailItem";
 import { useCategories, Category } from "@/hooks/useCategories";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -14,230 +13,117 @@ import { format } from "date-fns";
 
 type CategoryState = Category | 'None';
 
-const categoryColors: Record<Category, string> = {
-  Work: "bg-blue-600/20 text-blue-400",
-  Personal: "bg-pink-600/20 text-pink-400",
-  Shopping: "bg-green-600/20 text-green-400",
-};
-
-// Helper function to read/write tasks directly to localStorage
-const getTasksFromStorage = () => {
-  if (typeof window === 'undefined') return [];
-  const item = localStorage.getItem('dyad-todo-tasks');
-  return item ? JSON.parse(item) : [];
-};
-
-const saveTasksToStorage = (tasks: any[]) => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('dyad-todo-tasks', JSON.stringify(tasks));
-  }
-};
-
 const AddTask = () => {
-  const { categories, DEFAULT_CATEGORIES } = useCategories();
+  const { categories } = useCategories();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<CategoryState>('None');
-  const [dueDate, setDueDate] = useState<Date | undefined>(undefined); // Change to Date object
+  const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const trimmedTitle = title.trim();
-    if (!trimmedTitle) return;
+    if (!title.trim()) return;
 
     const newTask = {
-      id: Date.now().toString(), // Simple unique ID generation
-      title: trimmedTitle,
+      id: Date.now().toString(),
+      title: title.trim(),
       description: description.trim(),
       category: category === 'None' ? 'Personal' : category,
-      time: undefined, // Time setting is not implemented yet
-      dueDate: dueDate ? dueDate.toISOString() : undefined, // Store date as ISO string
+      dueDate: dueDate ? dueDate.toISOString() : undefined,
       completed: false,
-      completionTime: undefined,
     };
 
-    // Read existing tasks, add new task, and save back
-    const existingTasks = getTasksFromStorage();
-    saveTasksToStorage([newTask, ...existingTasks]);
+    const item = localStorage.getItem('dyad-todo-tasks');
+    const existingTasks = item ? JSON.parse(item) : [];
+    localStorage.setItem('dyad-todo-tasks', JSON.stringify([newTask, ...existingTasks]));
     
-    showSuccess(`Task "${trimmedTitle}" added!`);
-    
-    // Navigate back to home
+    showSuccess(`Task created!`);
     navigate("/");
   };
 
-  const handleCategorySelect = (cat: Category) => {
-    setCategory(cat);
-  };
-
-  // Helper to get color class for dynamic categories
-  const getCategoryColorClass = (cat: Category) => {
-    if (cat in categoryColors) {
-      return categoryColors[cat as keyof typeof categoryColors];
-    }
-    // Default color for custom tags
-    return "bg-purple-600/20 text-purple-400";
-  };
-
-  const QuickTagButton: React.FC<{ tag: Category }> = ({ tag }) => {
-    const colorClass = getCategoryColorClass(tag);
-    const isActive = category === tag;
-    
-    return (
-      <Button
-        variant="outline"
-        onClick={() => handleCategorySelect(tag)}
-        className={`rounded-full px-4 py-2 h-auto text-sm font-medium transition-colors 
-          ${isActive 
-            ? `${colorClass} border-2 border-opacity-50` 
-            : "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
-          }
-        `}
-      >
-        <span className={`h-2 w-2 rounded-full mr-2 ${tag === 'Work' ? 'bg-blue-400' : tag === 'Personal' ? 'bg-pink-400' : tag === 'Shopping' ? 'bg-green-400' : 'bg-purple-400'}`}></span>
-        {tag}
-      </Button>
-    );
-  };
-  
-  const dueDateValue = dueDate 
-    ? format(dueDate, "MMM dd, yyyy") 
-    : "Set a date";
-
-  // Custom trigger component for the date picker popover
-  // This avoids conflicts with TaskDetailItem's internal onClick handler
-  const DatePickerTrigger = () => (
-    <div className={cn(
-      "flex items-center justify-between p-4 rounded-xl cursor-pointer transition-colors",
-      "hover:bg-gray-800/70 border-b border-gray-700/50 last:border-b-0"
-    )}>
-      <div className="flex items-center space-x-4">
-        <div className="p-3 rounded-xl bg-blue-600">
-          <CalendarIcon className="h-5 w-5 text-white" />
-        </div>
-        <div>
-          <p className="text-lg font-medium text-white">Due Date</p>
-          <p className="text-sm text-gray-400">
-            {dueDate ? "Deadline set" : "Set a deadline"}
-          </p>
-        </div>
-      </div>
-      <div className="flex items-center space-x-2 text-gray-400">
-        <span className="font-medium">{dueDateValue}</span>
-        <CalendarIcon className="h-4 w-4" />
-      </div>
-    </div>
-  );
-
   return (
-    <div className="min-h-screen bg-[#101827] text-white">
-      
-      {/* Fixed Header */}
-      <header className="sticky top-0 z-20 flex items-center justify-between p-4 bg-[#101827] border-b border-gray-800/50">
-        <Link to="/">
-          <Button variant="ghost" size="icon" className="text-gray-300 hover:bg-gray-800">
-            <X className="h-6 w-6" />
+    <div className="min-h-screen px-6 py-10">
+      <div className="max-w-md mx-auto">
+        <header className="flex items-center justify-between mb-10">
+          <Link to="/">
+            <Button variant="ghost" size="icon" className="glass h-10 w-10 rounded-xl">
+              <X className="h-5 w-5 text-white/70" />
+            </Button>
+          </Link>
+          <h1 className="text-xl font-black text-white uppercase tracking-tighter">Create Task</h1>
+          <Button 
+            onClick={handleSubmit} 
+            disabled={!title.trim()}
+            className="bg-indigo-500 hover:bg-indigo-600 rounded-xl px-6 font-bold shadow-lg shadow-indigo-500/20"
+          >
+            Save
           </Button>
-        </Link>
-        <h1 className="text-xl font-semibold text-white">Add New Task</h1>
-        <Button 
-          onClick={handleSubmit} 
-          className="bg-blue-600 hover:bg-blue-700 font-semibold"
-          disabled={!title.trim()}
-        >
-          Save
-        </Button>
-      </header>
+        </header>
 
-      <div className="max-w-md mx-auto px-4 py-6">
-        
-        {/* Task Title Input Card */}
-        <div className="mb-6 p-4 bg-gray-800/50 rounded-xl shadow-lg">
-          <label htmlFor="title" className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
-            Task Title
-          </label>
-          <Input
-            id="title"
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder=""
-            required
-            className="h-12 text-xl bg-white text-gray-900 border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-lg placeholder:text-gray-500"
-          />
-        </div>
-
-        {/* Description Input Card */}
-        <div className="mb-6 p-4 bg-gray-800/50 rounded-xl shadow-lg">
-          <label htmlFor="description" className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
-            Description
-          </label>
-          <Textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Add details, notes, or subtasks..."
-            rows={4}
-            className="bg-gray-900 border-none text-white placeholder:text-gray-500 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-lg"
-          />
-        </div>
-        
-        {/* Detail Items Container */}
-        <div className="mb-8 bg-gray-800/50 rounded-xl shadow-lg divide-y divide-gray-700/50">
-          
-          {/* Due Date Picker - Using custom trigger */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <div>
-                <DatePickerTrigger />
-              </div>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 bg-gray-900 border-gray-700 text-white">
-              <Calendar
-                mode="single"
-                selected={dueDate}
-                onSelect={setDueDate}
-                initialFocus
-                className="[&_td]:text-white [&_th]:text-gray-400 [&_button]:text-white [&_button:hover]:bg-gray-700"
+        <div className="space-y-8">
+          <div className="space-y-3">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Task Details</p>
+            <div className="glass p-6 rounded-[2rem] space-y-6">
+              <Input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="What needs to be done?"
+                className="h-auto p-0 bg-transparent border-none text-2xl font-bold placeholder:text-white/10 focus-visible:ring-0"
               />
-              <div className="p-2 border-t border-gray-700 flex justify-end">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setDueDate(undefined)}
-                  className="text-red-400 hover:bg-gray-700"
+              <div className="h-[1px] w-full bg-white/5" />
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Add more details..."
+                className="bg-transparent border-none p-0 min-h-[100px] text-white/50 placeholder:text-white/10 focus-visible:ring-0 resize-none"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Date</p>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" className="glass h-20 w-full rounded-[1.5rem] flex flex-col items-center justify-center space-y-1">
+                    <CalendarIcon className="h-5 w-5 text-indigo-400" />
+                    <span className="text-[10px] font-bold text-white/40 uppercase">
+                      {dueDate ? format(dueDate, "MMM dd") : "Set Date"}
+                    </span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="glass-dark border-white/10">
+                  <Calendar mode="single" selected={dueDate} onSelect={setDueDate} />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Tags</p>
+              <Button variant="ghost" className="glass h-20 w-full rounded-[1.5rem] flex flex-col items-center justify-center space-y-1">
+                <Tag className="h-5 w-5 text-purple-400" />
+                <span className="text-[10px] font-bold text-white/40 uppercase">
+                  {category === 'None' ? 'Choose' : category}
+                </span>
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Quick Select Category</p>
+            <div className="flex flex-wrap gap-2">
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setCategory(cat)}
+                  className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${category === cat ? 'bg-indigo-500 text-white' : 'glass text-white/30 hover:text-white/60'}`}
                 >
-                  Clear Date
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-
-          {/* Category */}
-          <TaskDetailItem
-            icon={<Tag className="h-5 w-5 text-white" />}
-            title="Category"
-            subtitle="Organize your tasks"
-            value={category}
-            iconBgColor="bg-purple-600"
-            onClick={() => console.log("Open Category Selector")}
-          />
-        </div>
-
-        {/* Quick Tags */}
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
-          Quick Tags
-        </h2>
-        <div className="flex flex-wrap gap-3">
-          {categories.map(tag => (
-            <QuickTagButton key={tag} tag={tag} />
-          ))}
-          
-          <Button variant="outline" size="icon" className="rounded-full h-10 w-10 border-dashed border-gray-700 bg-transparent hover:bg-gray-800 text-gray-400">
-            <Plus className="h-5 w-5" />
-          </Button>
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

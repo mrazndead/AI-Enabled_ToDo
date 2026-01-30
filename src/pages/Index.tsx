@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings } from "lucide-react";
+import { Plus, Settings, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import TodoList from "@/components/TodoList";
 import DailyGoalsCard from "@/components/DailyGoalsCard";
@@ -8,13 +8,14 @@ import { format, isToday } from "date-fns";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { getGreeting } from "@/lib/utils";
 import { useStreak } from "@/hooks/useStreak";
-import { useCategories, Category } from "@/hooks/useCategories"; // Import useCategories and Category type
-import CategoryManagerDialog from "@/components/CategoryManagerDialog"; // Import CategoryManagerDialog
+import { useCategories, Category } from "@/hooks/useCategories";
+import CategoryManagerDialog from "@/components/CategoryManagerDialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface Todo {
   id: string;
   title: string;
-  category: Category; // Use dynamic Category type
+  category: Category;
   time?: string;
   completed: boolean;
   completionTime?: string;
@@ -23,156 +24,126 @@ interface Todo {
 type CategoryFilter = 'All' | Category;
 
 const initialTodos: Todo[] = [
-  {
-    id: "1",
-    title: "Review Q3 Design Mockups",
-    category: "Work",
-    time: "10:00 AM",
-    completed: false,
-  },
-  {
-    id: "2",
-    title: "Grocery Shopping",
-    category: "Shopping",
-    time: "5:00 PM",
-    completed: false,
-  },
-  {
-    id: "3",
-    title: "Morning Standup",
-    category: "Work",
-    completed: true,
-    completionTime: "9:30 AM",
-  },
-  {
-    id: "4",
-    title: "Buy new shoes",
-    category: "Shopping",
-    completed: false,
-  },
-  {
-    id: "5",
-    title: "Read book chapter",
-    category: "Personal",
-    completed: false,
-  },
+  { id: "1", title: "Review Q3 Design Mockups", category: "Work", time: "10:00 AM", completed: false },
+  { id: "2", title: "Grocery Shopping", category: "Shopping", time: "5:00 PM", completed: false },
+  { id: "3", title: "Morning Standup", category: "Work", completed: true, completionTime: "9:30 AM" },
 ];
 
 const Index = () => {
-  const { categories } = useCategories(); // Use the categories hook
-  // Use useLocalStorage to persist todos
+  const { categories } = useCategories();
   const [todos, setTodos] = useLocalStorage<Todo[]>('dyad-todo-tasks', initialTodos);
   const [activeFilter, setActiveFilter] = useState<CategoryFilter>('All');
 
   const handleToggle = (id: string) => {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id
-          ? { 
-              ...todo, 
-              completed: !todo.completed,
-              completionTime: !todo.completed ? format(new Date(), 'h:mm a') : undefined
-            } 
-          : todo
-      )
-    );
+    setTodos(todos.map((todo) =>
+      todo.id === id ? { 
+        ...todo, 
+        completed: !todo.completed,
+        completionTime: !todo.completed ? format(new Date(), 'h:mm a') : undefined
+      } : todo
+    ));
   };
 
   const handleDelete = (id: string) => {
     setTodos(todos.filter((todo) => todo.id !== id));
   };
   
-  // Calculate tasks completed today
   const completedTasksToday = todos.filter(t => t.completed && t.completionTime && isToday(new Date(t.completionTime))).length;
-  
-  const currentStreak = useStreak(completedTasksToday); // Use the new streak hook
-
+  const currentStreak = useStreak(completedTasksToday);
   const completedTasks = todos.filter(t => t.completed).length;
   const totalTasks = todos.length;
-  const todayDate = format(new Date(), 'EEEE, MMM dd');
-  const greeting = getGreeting(); // Get dynamic greeting
+  const greeting = getGreeting();
   
-  const filteredTodos = todos.filter(todo => 
-    activeFilter === 'All' || todo.category === activeFilter
-  );
+  const filteredTodos = todos.filter(todo => activeFilter === 'All' || todo.category === activeFilter);
   
-  const FilterButton: React.FC<{ category: CategoryFilter }> = ({ category }) => {
-    const isActive = activeFilter === category;
-    return (
-      <Button
-        variant={isActive ? "default" : "secondary"}
-        onClick={() => setActiveFilter(category)}
-        className={`rounded-full px-4 py-2 text-sm font-medium transition-colors h-auto
-          ${isActive 
-            ? "bg-blue-600 hover:bg-blue-700 text-white" 
-            : "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700"
-          }
-        `}
-      >
-        {category}
-      </Button>
-    );
-  };
-
-
   return (
-    // Apply dark background to match the design
-    <div className="min-h-screen bg-[#101827] text-white"> 
-      <div className="max-w-md mx-auto px-4 py-12">
+    <div className="min-h-screen">
+      <div className="max-w-md mx-auto px-6 py-10 pb-32">
         
-        {/* Header */}
-        <header className="mb-8 flex justify-between items-start">
-          <div>
-            <h1 className="text-4xl font-bold mb-1">{greeting}</h1>
-            <p className="text-gray-400 text-md">{todayDate}</p>
+        {/* User Profile & Settings */}
+        <div className="flex justify-between items-center mb-10">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full blur-[2px] opacity-75" />
+              <Avatar className="h-12 w-12 border-2 border-background relative">
+                <AvatarImage src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=128&h=128&fit=crop" />
+                <AvatarFallback><User /></AvatarFallback>
+              </Avatar>
+            </div>
+            <div>
+              <p className="text-white font-black text-xl tracking-tight leading-none">{greeting}, Alex</p>
+              <p className="text-indigo-300/50 text-xs font-bold uppercase tracking-widest mt-1">
+                {format(new Date(), 'EEEE, MMM dd')}
+              </p>
+            </div>
           </div>
           
-          {/* Category Management Button */}
           <CategoryManagerDialog>
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:bg-gray-800">
-              <Settings className="h-6 w-6" />
+            <Button variant="ghost" size="icon" className="glass h-10 w-10 rounded-xl">
+              <Settings className="h-5 w-5 text-white/70" />
             </Button>
           </CategoryManagerDialog>
-        </header>
+        </div>
 
-        {/* Daily Goals Card */}
-        <div className="mb-8">
+        {/* Goals Section */}
+        <div className="mb-10">
           <DailyGoalsCard 
             totalTasks={totalTasks} 
             completedTasks={completedTasks} 
-            streak={currentStreak} // Pass the calculated streak
+            streak={currentStreak} 
           />
         </div>
 
-        {/* Category Filters */}
-        <div className="flex space-x-3 overflow-x-auto pb-4 whitespace-nowrap scrollbar-hide">
-          <FilterButton category="All" />
-          {categories.map(category => (
-            <FilterButton key={category} category={category} />
-          ))}
+        {/* Categories Bar */}
+        <div className="sticky top-4 z-30 mb-8 py-2">
+          <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
+            <Button
+              variant="ghost"
+              onClick={() => setActiveFilter('All')}
+              className={`rounded-2xl px-5 h-10 font-bold text-xs uppercase tracking-widest transition-all ${activeFilter === 'All' ? 'glass text-white' : 'text-white/30 hover:text-white/60'}`}
+            >
+              All
+            </Button>
+            {categories.map(category => (
+              <Button
+                key={category}
+                variant="ghost"
+                onClick={() => setActiveFilter(category)}
+                className={`rounded-2xl px-5 h-10 font-bold text-xs uppercase tracking-widest transition-all ${activeFilter === category ? 'glass text-white' : 'text-white/30 hover:text-white/60'}`}
+              >
+                {category}
+              </Button>
+            ))}
+          </div>
         </div>
         
-        {/* Today's Tasks Header */}
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mt-4 mb-2">
-          Today's Tasks
-        </h2>
+        {/* Task List Section */}
+        <div className="space-y-6">
+          <div className="flex justify-between items-center px-1">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">
+              Today's Schedule
+            </h2>
+            <div className="h-[1px] flex-1 bg-white/5 ml-4" />
+          </div>
 
-        {/* Todo List */}
-        <TodoList
-          todos={filteredTodos}
-          onToggle={handleToggle}
-          onDelete={handleDelete}
-        />
+          <TodoList
+            todos={filteredTodos}
+            onToggle={handleToggle}
+            onDelete={handleDelete}
+          />
+        </div>
 
-        {/* Floating Action Button (FAB) */}
-        <div className="fixed bottom-6 right-6 z-10">
+        {/* Floating Add Button */}
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40">
           <Link to="/add-task">
-            <Button 
-              size="icon" 
-              className="rounded-full w-14 h-14 shadow-xl bg-blue-600 hover:bg-blue-700"
-            >
-              <Plus className="h-6 w-6" />
-            </Button>
+            <div className="relative group">
+              <div className="absolute -inset-4 bg-indigo-500/30 rounded-full blur-2xl group-hover:bg-indigo-500/50 transition-all" />
+              <Button 
+                className="h-16 w-16 rounded-[2rem] bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-[0_15px_30px_-10px_rgba(99,102,241,0.5)] border border-white/20 relative"
+              >
+                <Plus className="h-8 w-8 text-white stroke-[3px]" />
+              </Button>
+            </div>
           </Link>
         </div>
       </div>
