@@ -65,62 +65,39 @@ const Index = () => {
         <div className="absolute top-[20%] -right-[10%] w-[30%] h-[30%] bg-purple-500/10 blur-[120px] rounded-full" />
       </div>
 
-      <div className="relative z-10 max-w-2xl mx-auto px-6 py-12">
-        {/* Header Section */}
-        <header className="mb-10">
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <p className="text-zinc-500 font-medium mb-1">{format(new Date(), 'EEEE, MMMM do')}</p>
-              <h1 className="text-4xl font-bold tracking-tight text-white">My Tasks</h1>
-            </div>
-            <div className="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 p-1 rounded-2xl flex items-center gap-2">
-              <div className="px-3 py-1 bg-indigo-500/10 rounded-xl">
-                <span className="text-indigo-400 font-bold text-sm">{stats.completed}/{stats.total}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="w-full h-1.5 bg-zinc-900 rounded-full mb-8 overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500 ease-out" 
-              style={{ width: `${stats.percent}%` }}
+      <div className="relative z-10 max-w-2xl mx-auto px-6 py-8 sm:py-12">
+        {/* Compact Header with Search & Filters */}
+        <header className="mb-8 space-y-4">
+          <div className="relative group">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 group-focus-within:text-indigo-400 transition-colors" />
+            <Input 
+              placeholder="Search your tasks..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-zinc-900/50 border-zinc-800 focus-visible:ring-indigo-500/50 h-12 pl-10 rounded-2xl text-base"
             />
           </div>
 
-          {/* Search & Filters */}
-          <div className="space-y-4">
-            <div className="relative group">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 group-focus-within:text-indigo-400 transition-colors" />
-              <Input 
-                placeholder="Search tasks..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-zinc-900/50 border-zinc-800 focus-visible:ring-indigo-500/50 h-11 pl-10 rounded-xl"
-              />
-            </div>
-
-            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+          <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+            <Button
+              variant={activeCategory === "All" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setActiveCategory("All")}
+              className={`rounded-xl border-zinc-800 h-9 px-4 shrink-0 ${activeCategory === "All" ? "bg-indigo-600 hover:bg-indigo-700" : "bg-zinc-900/30 text-zinc-400"}`}
+            >
+              All
+            </Button>
+            {categories.map(cat => (
               <Button
-                variant={activeCategory === "All" ? "default" : "outline"}
+                key={cat}
+                variant={activeCategory === cat ? "default" : "outline"}
                 size="sm"
-                onClick={() => setActiveCategory("All")}
-                className={`rounded-xl border-zinc-800 h-9 px-4 ${activeCategory === "All" ? "bg-indigo-600 hover:bg-indigo-700" : "bg-transparent text-zinc-400"}`}
+                onClick={() => setActiveCategory(cat)}
+                className={`rounded-xl border-zinc-800 h-9 px-4 whitespace-nowrap shrink-0 ${activeCategory === cat ? "bg-indigo-600 hover:bg-indigo-700" : "bg-zinc-900/30 text-zinc-400"}`}
               >
-                All
+                {cat}
               </Button>
-              {categories.map(cat => (
-                <Button
-                  key={cat}
-                  variant={activeCategory === cat ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setActiveCategory(cat)}
-                  className={`rounded-xl border-zinc-800 h-9 px-4 whitespace-nowrap ${activeCategory === cat ? "bg-indigo-600 hover:bg-indigo-700" : "bg-transparent text-zinc-400"}`}
-                >
-                  {cat}
-                </Button>
-              ))}
-            </div>
+            ))}
           </div>
         </header>
 
@@ -143,7 +120,7 @@ const Index = () => {
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">Everything's clear</h3>
               <p className="text-zinc-500 max-w-[240px] mx-auto">
-                No tasks found in this view. Time to relax or create a new one!
+                No tasks found. Time to relax or create a new one!
               </p>
             </div>
           )}
