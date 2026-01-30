@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ChevronLeft, Trash2, Calendar, Tag, CheckCircle2, Circle, Clock } from "lucide-react";
+import { ChevronLeft, Trash2, Calendar, Tag, CheckCircle2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { Category, useCategories } from "@/hooks/useCategories";
+import { Category } from "@/hooks/useCategories";
 import { format } from "date-fns";
-import { showSuccess, showError } from "@/utils/toast";
+import { showSuccess } from "@/utils/toast";
 import { cn } from "@/lib/utils";
 
 interface Todo {
@@ -22,36 +22,40 @@ const TaskDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [todos, setTodos] = useLocalStorage<Todo[]>("dyad-todo-tasks", []);
-  const [task, setTask] = useState<Todo | null>(null);
 
-  useEffect(() => {
-    const foundTask = todos.find((t) => t.id === id);
-    if (foundTask) {
-      setTask(foundTask);
-    } else {
+  // Derive the current task directly from the todos list
+  const task = useMemo(() => {
+    return todos.find((t) => t.id === id);
+  }, [id, todos]);
+
+  // If task not found (e.g. deleted), redirect home
+  React.useEffect(() => {
+    if (todos.length > 0 && !task) {
       navigate("/");
     }
-  }, [id, todos, navigate]);
+  }, [task, todos, navigate]);
 
   if (!task) return null;
 
   const handleToggle = () => {
+    const newStatus = !task.completed;
     const updatedTodos = todos.map((t) =>
       t.id === id 
         ? { 
             ...t, 
-            completed: !t.completed,
-            completionTime: !t.completed ? format(new Date(), 'h:mm a') : undefined
+            completed: newStatus,
+            completionTime: newStatus ? format(new Date(), 'h:mm a') : undefined
           } 
         : t
     );
     setTodos(updatedTodos);
+    showSuccess(newStatus ? "Task marked as finished" : "Task marked as incomplete");
   };
 
   const handleDelete = () => {
     const updatedTodos = todos.filter((t) => t.id !== id);
     setTodos(updatedTodos);
-    showSuccess("Task deleted successfully");
+    showSuccess("Task deleted");
     navigate("/");
   };
 
@@ -82,20 +86,20 @@ const TaskDetail = () => {
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-6 py-10 relative z-10">
+      <main className="max-w-2xl mx-auto px-6 py-10 relative z-10 pb-32">
         <div className="space-y-10">
           {/* Status & Title */}
           <section className="flex items-start gap-5">
             <button 
               onClick={handleToggle}
               className={cn(
-                "mt-1 h-8 w-8 rounded-xl flex items-center justify-center transition-all duration-300 border-2 shrink-0",
+                "mt-1 h-10 w-10 rounded-2xl flex items-center justify-center transition-all duration-300 border-2 shrink-0",
                 task.completed 
                   ? "bg-indigo-600 border-indigo-600 shadow-lg shadow-indigo-600/20" 
-                  : "border-zinc-700 hover:border-indigo-500"
+                  : "border-zinc-700 hover:border-indigo-500 bg-zinc-900/50"
               )}
             >
-              {task.completed && <CheckCircle2 className="h-5 w-5 text-white" />}
+              {task.completed && <CheckCircle2 className="h-6 w-6 text-white" />}
             </button>
             <div className="space-y-2">
               <h2 className={cn(
@@ -107,7 +111,7 @@ const TaskDetail = () => {
               {task.completed && task.completionTime && (
                 <p className="text-indigo-400 text-sm font-medium flex items-center gap-1.5">
                   <Clock className="h-3.5 w-3.5" />
-                  Completed today at {task.completionTime}
+                  Finished today at {task.completionTime}
                 </p>
               )}
             </div>
@@ -115,7 +119,7 @@ const TaskDetail = () => {
 
           {/* Metadata Cards */}
           <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="p-5 bg-zinc-900/40 border border-zinc-800/60 rounded-3xl space-y-3">
+            <div className="p-6 bg-zinc-900/40 border border-zinc-800/60 rounded-3xl space-y-3">
               <div className="flex items-center gap-2 text-zinc-500">
                 <Tag className="h-4 w-4" />
                 <span className="text-xs font-bold uppercase tracking-wider">Category</span>
@@ -123,7 +127,7 @@ const TaskDetail = () => {
               <p className="text-lg font-semibold text-white">{task.category}</p>
             </div>
 
-            <div className="p-5 bg-zinc-900/40 border border-zinc-800/60 rounded-3xl space-y-3">
+            <div className="p-6 bg-zinc-900/40 border border-zinc-800/60 rounded-3xl space-y-3">
               <div className="flex items-center gap-2 text-zinc-500">
                 <Calendar className="h-4 w-4" />
                 <span className="text-xs font-bold uppercase tracking-wider">Due Date</span>
@@ -137,8 +141,11 @@ const TaskDetail = () => {
           {/* Description */}
           <section className="space-y-4">
             <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 ml-1">Notes</h3>
-            <div className="p-8 bg-zinc-900/20 border border-zinc-800/40 rounded-[2rem] min-h-[200px]">
-              <p className="text-zinc-400 leading-relaxed">
+            <div className="p-8 bg-zinc-900/40 border border-zinc-800/60 rounded-[2.5rem] min-h-[160px]">
+              <p className={cn(
+                "leading-relaxed transition-colors duration-300",
+                task.completed ? "text-zinc-600" : "text-zinc-300"
+              )}>
                 {task.description || "No notes provided for this task."}
               </p>
             </div>
@@ -147,15 +154,15 @@ const TaskDetail = () => {
       </main>
 
       {/* Footer Action */}
-      <footer className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#09090b] to-transparent pointer-events-none">
+      <footer className="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-[#09090b] via-[#09090b]/90 to-transparent pointer-events-none">
         <div className="max-w-2xl mx-auto flex justify-center pointer-events-auto">
           <Button 
             onClick={handleToggle}
             className={cn(
-              "h-14 px-8 rounded-2xl font-bold shadow-xl transition-all duration-300",
+              "h-16 px-10 rounded-2xl font-bold text-lg shadow-2xl transition-all duration-300",
               task.completed 
-                ? "bg-zinc-800 text-zinc-400 hover:bg-zinc-700" 
-                : "bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-500/20"
+                ? "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200" 
+                : "bg-indigo-600 text-white hover:bg-indigo-500 shadow-indigo-600/20 active:scale-95"
             )}
           >
             {task.completed ? "Mark as Incomplete" : "Mark as Finished"}
