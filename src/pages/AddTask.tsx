@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Link, useNavigate } from "react-router-dom";
-import { X } from "lucide-react";
+import { X, Plus } from "lucide-react";
 import { showSuccess } from "@/utils/toast";
 import { useCategories, Category } from "@/hooks/useCategories";
+import { format } from "date-fns";
 
 const AddTask = () => {
   const { categories } = useCategories();
@@ -66,7 +68,7 @@ const AddTask = () => {
 
           <div className="space-y-4">
             <label className="text-sm font-black uppercase">Pick Category_</label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-3">
               {categories.map((cat) => (
                 <button
                   key={cat}
@@ -74,7 +76,7 @@ const AddTask = () => {
                   onClick={() => setCategory(cat)}
                   className={`px-5 py-3 border-4 border-black font-black uppercase text-sm transition-all ${
                     category === cat 
-                      ? "bg-[#00FFFF] translate-x-[1px] translate-y-[1px]" 
+                      ? "bg-[#00FFFF] translate-x-[2px] translate-y-[2px]" 
                       : "bg-white brutalist-shadow hover:translate-x-[1px] hover:translate-y-[1px]"
                   }`}
                 >
