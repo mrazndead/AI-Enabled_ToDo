@@ -3,38 +3,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Link, useNavigate } from "react-router-dom";
-import { X, Calendar as CalendarIcon, Plus, Check } from "lucide-react";
+import { X, Calendar as CalendarIcon } from "lucide-react";
 import { showSuccess } from "@/utils/toast";
 import { useCategories, Category } from "@/hooks/useCategories";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
-
-type CategoryState = Category | 'None';
-
-const getTasksFromStorage = () => {
-  if (typeof window === 'undefined') return [];
-  const item = localStorage.getItem('dyad-todo-tasks');
-  return item ? JSON.parse(item) : [];
-};
-
-const saveTasksToStorage = (tasks: any[]) => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('dyad-todo-tasks', JSON.stringify(tasks));
-  }
-};
 
 const AddTask = () => {
   const { categories } = useCategories();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState<CategoryState>('Personal');
-  const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
+  const [category, setCategory] = useState<Category>('Personal');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
 
@@ -42,139 +24,79 @@ const AddTask = () => {
       id: Date.now().toString(),
       title: title.trim(),
       description: description.trim(),
-      category: category === 'None' ? 'Personal' : category,
-      dueDate: dueDate ? dueDate.toISOString() : undefined,
+      category,
       completed: false,
+      dueDate: new Date().toISOString()
     };
 
-    const existingTasks = getTasksFromStorage();
-    saveTasksToStorage([newTask, ...existingTasks]);
-    showSuccess(`Added: ${title}`);
+    const existing = JSON.parse(localStorage.getItem('dyad-todo-tasks') || '[]');
+    localStorage.setItem('dyad-todo-tasks', JSON.stringify([newTask, ...existing]));
+    showSuccess("TASK CREATED!");
     navigate("/");
   };
 
   return (
-    <motion.div 
-      initial={{ y: "100%" }}
-      animate={{ y: 0 }}
-      exit={{ y: "100%" }}
-      transition={{ type: "spring", damping: 30, stiffness: 300 }}
-      className="min-h-screen bg-[#09090b] text-zinc-100 selection:bg-indigo-500/30"
-    >
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#09090b]/80 border-b border-zinc-800/50">
-        <div className="max-w-2xl mx-auto px-6 h-16 flex items-center justify-between">
+    <div className="min-h-screen bg-[#F4F4F4] p-4 sm:p-8">
+      <div className="max-w-2xl mx-auto space-y-8">
+        <header className="flex items-center justify-between bg-black text-white p-6 brutalist-shadow">
+          <h1 className="text-3xl font-black uppercase italic tracking-tighter">NEW_TASK</h1>
           <Link to="/">
-            <Button variant="ghost" size="icon" className="rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900">
-              <X className="h-6 w-6" />
-            </Button>
+            <X className="h-8 w-8 cursor-pointer hover:rotate-90 transition-transform" />
           </Link>
-          <h1 className="text-lg font-bold">New Task</h1>
-          <motion.div whileTap={{ scale: 0.95 }}>
-            <Button 
-              onClick={handleSubmit} 
-              className="bg-indigo-600 hover:bg-indigo-700 rounded-xl px-6 font-semibold"
-              disabled={!title.trim()}
-            >
-              Create
-            </Button>
-          </motion.div>
-        </div>
-      </header>
+        </header>
 
-      <main className="max-w-2xl mx-auto px-6 py-10">
-        <div className="space-y-8">
-          <motion.section 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className="space-y-2"
-          >
-            <label className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500 ml-1">Task Title</label>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-sm font-black uppercase">What is it?</label>
             <Input
               autoFocus
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="What needs to be done?"
-              className="bg-transparent border-none text-3xl font-bold h-auto p-0 focus-visible:ring-0 placeholder:text-zinc-800"
+              placeholder="E.G. BUY MILK"
+              className="bg-white border-4 border-black brutalist-shadow h-20 px-6 text-2xl font-black uppercase placeholder:text-zinc-300 focus-visible:ring-0"
             />
-          </motion.section>
+          </div>
 
-          <motion.section 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-zinc-900/30 border border-zinc-800/50 rounded-3xl overflow-hidden divide-y divide-zinc-800/50 shadow-xl shadow-black/20"
-          >
-            <div className="p-6 space-y-2">
-              <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-500">
-                <Plus className="h-3 w-3" /> Description
-              </label>
-              <Textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Add some details..."
-                className="bg-transparent border-none p-0 focus-visible:ring-0 text-zinc-300 resize-none min-h-[100px]"
-              />
-            </div>
+          <div className="bg-white border-4 border-black brutalist-shadow p-6 space-y-4">
+            <label className="text-sm font-black uppercase">Details_</label>
+            <Textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="ADD NOTES..."
+              className="border-2 border-black h-32 text-lg font-bold resize-none focus-visible:ring-0"
+            />
+          </div>
 
-            <Popover>
-              <PopoverTrigger asChild>
-                <button className="w-full flex items-center justify-between p-6 hover:bg-zinc-800/30 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-zinc-800 border border-zinc-700 rounded-2xl">
-                      <CalendarIcon className="h-5 w-5 text-indigo-400" />
-                    </div>
-                    <div className="text-left">
-                      <p className="text-sm font-semibold text-white">Due Date</p>
-                      <p className="text-xs text-zinc-500">
-                        {dueDate ? format(dueDate, 'EEEE, MMM do') : 'Set a deadline'}
-                      </p>
-                    </div>
-                  </div>
-                  {dueDate && <Check className="h-5 w-5 text-indigo-500" />}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-zinc-900 border-zinc-800">
-                <Calendar
-                  mode="single"
-                  selected={dueDate}
-                  onSelect={setDueDate}
-                  initialFocus
-                  className="[&_td]:text-zinc-100 [&_th]:text-zinc-500 [&_button]:text-zinc-100 [&_button:hover]:bg-zinc-800"
-                />
-              </PopoverContent>
-            </Popover>
-          </motion.section>
-
-          <motion.section 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="space-y-4"
-          >
-            <label className="text-xs font-bold uppercase tracking-wider text-zinc-500 ml-1">Category</label>
-            <div className="flex flex-wrap gap-2">
+          <div className="space-y-4">
+            <label className="text-sm font-black uppercase">Pick Category_</label>
+            <div className="flex flex-wrap gap-3">
               {categories.map((cat) => (
-                <motion.button
+                <button
                   key={cat}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  type="button"
                   onClick={() => setCategory(cat)}
-                  className={cn(
-                    "px-4 py-2.5 rounded-2xl border text-sm font-semibold transition-all duration-200",
+                  className={`px-6 py-3 border-4 border-black font-black uppercase text-sm transition-all ${
                     category === cat 
-                      ? "bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20" 
-                      : "bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:border-zinc-700"
-                  )}
+                      ? "bg-[#00FFFF] translate-x-[2px] translate-y-[2px]" 
+                      : "bg-white brutalist-shadow hover:translate-x-[1px] hover:translate-y-[1px]"
+                  }`}
                 >
                   {cat}
-                </motion.button>
+                </button>
               ))}
             </div>
-          </motion.section>
-        </div>
-      </main>
-    </motion.div>
+          </div>
+
+          <button 
+            type="submit"
+            disabled={!title.trim()}
+            className="w-full h-20 bg-[#FFE600] border-4 border-black brutalist-shadow text-2xl font-black uppercase hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            CREATE TASK_
+          </button>
+        </form>
+      </div>
+    </div>
   );
 };
 
