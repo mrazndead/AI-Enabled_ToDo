@@ -1,12 +1,10 @@
 import React, { useState, useMemo } from "react";
 import { Plus, Search, CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import TodoItem from "@/components/TodoItem";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useCategories, Category } from "@/hooks/useCategories";
-import { format } from "date-fns";
 
 interface Todo {
   id: string;
@@ -53,14 +51,14 @@ const Index = () => {
             />
           </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+          <div className="flex gap-1 overflow-x-auto pb-2 no-scrollbar">
             {["All", ...categories].map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat as any)}
-                className={`px-6 py-2 border-2 border-black font-black uppercase text-xs transition-all ${
+                className={`px-5 py-2 border-2 border-black font-black uppercase text-xs transition-all shrink-0 ${
                   activeCategory === cat 
-                    ? "bg-black text-white translate-x-[2px] translate-y-[2px]" 
+                    ? "bg-black text-white translate-x-[1px] translate-y-[1px]" 
                     : "bg-white brutalist-shadow-sm hover:translate-x-[1px] hover:translate-y-[1px]"
                 }`}
               >

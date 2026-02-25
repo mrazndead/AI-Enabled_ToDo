@@ -1,18 +1,16 @@
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Link, useNavigate } from "react-router-dom";
-import { X, Calendar as CalendarIcon } from "lucide-react";
+import { X } from "lucide-react";
 import { showSuccess } from "@/utils/toast";
 import { useCategories, Category } from "@/hooks/useCategories";
-import { format } from "date-fns";
 
 const AddTask = () => {
   const { categories } = useCategories();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState<Category>('Personal');
+  const [category, setCategory] = useState<Category>('Work');
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -51,7 +49,7 @@ const AddTask = () => {
               autoFocus
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="E.G. BUY MILK"
+              placeholder="E.G. PAY RENT"
               className="bg-white border-4 border-black brutalist-shadow h-20 px-6 text-2xl font-black uppercase placeholder:text-zinc-300 focus-visible:ring-0"
             />
           </div>
@@ -68,15 +66,15 @@ const AddTask = () => {
 
           <div className="space-y-4">
             <label className="text-sm font-black uppercase">Pick Category_</label>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
               {categories.map((cat) => (
                 <button
                   key={cat}
                   type="button"
                   onClick={() => setCategory(cat)}
-                  className={`px-6 py-3 border-4 border-black font-black uppercase text-sm transition-all ${
+                  className={`px-5 py-3 border-4 border-black font-black uppercase text-sm transition-all ${
                     category === cat 
-                      ? "bg-[#00FFFF] translate-x-[2px] translate-y-[2px]" 
+                      ? "bg-[#00FFFF] translate-x-[1px] translate-y-[1px]" 
                       : "bg-white brutalist-shadow hover:translate-x-[1px] hover:translate-y-[1px]"
                   }`}
                 >
