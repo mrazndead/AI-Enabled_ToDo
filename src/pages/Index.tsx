@@ -88,7 +88,7 @@ const Index = () => {
           )}
         </main>
 
-        <div className="fixed bottom-8 right-8 z-50">
+        <div className="fixed bottom-[42px] right-8 z-50">
           <Link to="/add">
             <button className="h-16 w-16 bg-[#00FF00] border-4 border-black brutalist-shadow flex items-center justify-center hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
               <Plus className="h-10 w-10 text-black stroke-[3]" />
