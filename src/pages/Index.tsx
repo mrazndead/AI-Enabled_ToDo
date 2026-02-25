@@ -7,7 +7,6 @@ import TodoItem from "@/components/TodoItem";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useCategories, Category } from "@/hooks/useCategories";
 import { format } from "date-fns";
-import { motion, AnimatePresence } from "framer-motion";
 
 interface Todo {
   id: string;
@@ -39,14 +38,10 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-[#F4F4F4] p-4 sm:p-8">
       <div className="max-w-2xl mx-auto space-y-8">
-        <motion.div 
-          initial={{ x: -20, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          className="bg-[#FFE600] border-4 border-black p-6 brutalist-shadow"
-        >
+        <div className="bg-[#FFE600] border-4 border-black p-6 brutalist-shadow">
           <h1 className="text-4xl font-black uppercase italic tracking-tighter">Tasks_</h1>
           <p className="font-bold text-sm mt-1">Don't forget. Just do it.</p>
-        </motion.div>
+        </div>
 
         <header className="space-y-4">
           <div className="relative">
@@ -76,40 +71,30 @@ const Index = () => {
         </header>
 
         <main>
-          <AnimatePresence mode="popLayout">
-            {filteredTodos.length > 0 ? (
-              <div className="space-y-4">
-                {filteredTodos.map((todo) => (
-                  <TodoItem 
-                    key={todo.id} 
-                    todo={todo} 
-                    onToggle={() => handleToggle(todo.id)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <motion.div 
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="py-20 bg-white border-4 border-black brutalist-shadow text-center"
-              >
-                <CheckCircle2 className="h-16 w-16 mx-auto mb-4" />
-                <h3 className="text-2xl font-black uppercase">Board Clear</h3>
-                <p className="font-bold text-zinc-500">Add something or go outside.</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {filteredTodos.length > 0 ? (
+            <div className="space-y-4">
+              {filteredTodos.map((todo) => (
+                <TodoItem 
+                  key={todo.id} 
+                  todo={todo} 
+                  onToggle={() => handleToggle(todo.id)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="py-20 bg-white border-4 border-black brutalist-shadow text-center">
+              <CheckCircle2 className="h-16 w-16 mx-auto mb-4" />
+              <h3 className="text-2xl font-black uppercase">Board Clear</h3>
+              <p className="font-bold text-zinc-500">Add something or go outside.</p>
+            </div>
+          )}
         </main>
 
         <div className="fixed bottom-8 right-8 z-50">
           <Link to="/add">
-            <motion.button 
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="h-16 w-16 bg-[#00FF00] border-4 border-black brutalist-shadow flex items-center justify-center hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
-            >
+            <button className="h-16 w-16 bg-[#00FF00] border-4 border-black brutalist-shadow flex items-center justify-center hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
               <Plus className="h-10 w-10 text-black stroke-[3]" />
-            </motion.button>
+            </button>
           </Link>
         </div>
       </div>

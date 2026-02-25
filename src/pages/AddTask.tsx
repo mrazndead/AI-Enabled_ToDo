@@ -7,7 +7,6 @@ import { X, Calendar as CalendarIcon } from "lucide-react";
 import { showSuccess } from "@/utils/toast";
 import { useCategories, Category } from "@/hooks/useCategories";
 import { format } from "date-fns";
-import { motion } from "framer-motion";
 
 const AddTask = () => {
   const { categories } = useCategories();

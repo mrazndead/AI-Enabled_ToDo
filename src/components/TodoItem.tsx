@@ -4,7 +4,6 @@ import { Check, Calendar, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Category } from "@/hooks/useCategories";
-import { motion } from "framer-motion";
 
 interface TodoItemProps {
   todo: {
@@ -19,16 +18,12 @@ interface TodoItemProps {
 
 const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle }) => {
   return (
-    <motion.div 
-      layout
-      className="group relative"
-    >
+    <div className="group relative">
       <div className={cn(
         "flex items-center gap-4 p-5 bg-white border-4 border-black brutalist-shadow transition-all",
         "hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none",
         todo.completed && "bg-zinc-100 opacity-80"
       )}>
-        {/* Brutalist Checkbox */}
         <button 
           onClick={(e) => {
             e.preventDefault();
@@ -67,7 +62,7 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle }) => {
 
         <ArrowRight className="h-6 w-6 stroke-[3]" />
       </div>
-    </motion.div>
+    </div>
   );
 };
 

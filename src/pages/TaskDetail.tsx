@@ -7,7 +7,6 @@ import { Category } from "@/hooks/useCategories";
 import { format } from "date-fns";
 import { showSuccess } from "@/utils/toast";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 
 interface Todo {
   id: string;
