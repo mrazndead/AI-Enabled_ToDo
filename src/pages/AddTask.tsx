@@ -66,13 +66,13 @@ const AddTask = () => {
 
           <div className="space-y-4">
             <label className="text-sm font-black uppercase">Pick Category_</label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-0">
               {categories.map((cat) => (
                 <button
                   key={cat}
                   type="button"
                   onClick={() => setCategory(cat)}
-                  className={`px-5 py-3 border-4 border-black font-black uppercase text-sm transition-all ${
+                  className={`px-4 py-3 border-4 border-black font-black uppercase text-sm transition-all ${
                     category === cat 
                       ? "bg-[#00FFFF] translate-x-[1px] translate-y-[1px]" 
                       : "bg-white brutalist-shadow hover:translate-x-[1px] hover:translate-y-[1px]"

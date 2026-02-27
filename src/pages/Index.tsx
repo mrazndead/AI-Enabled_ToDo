@@ -51,12 +51,12 @@ const Index = () => {
             />
           </div>
 
-          <div className="flex gap-1 overflow-x-auto pb-2 no-scrollbar">
+          <div className="flex gap-0 overflow-x-auto pb-2 no-scrollbar">
             {["All", ...categories].map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat as any)}
-                className={`px-5 py-2 border-2 border-black font-black uppercase text-xs transition-all shrink-0 ${
+                className={`px-4 py-2 border-2 border-black font-black uppercase text-xs transition-all shrink-0 ${
                   activeCategory === cat 
                     ? "bg-black text-white translate-x-[1px] translate-y-[1px]" 
                     : "bg-white brutalist-shadow-sm hover:translate-x-[1px] hover:translate-y-[1px]"

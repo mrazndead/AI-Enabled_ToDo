@@ -1,8 +1,8 @@
-export type Category = "Work" | "Money" | "Errand";
+export type Category = "Work" | "$" | "Travel" | "Misc";
 
 export const useCategories = () => {
-  const categories: Category[] = ["Work", "Money", "Errand"];
-  const DEFAULT_CATEGORIES: Category[] = ["Work", "Money", "Errand"];
+  const categories: Category[] = ["Work", "$", "Travel", "Misc"];
+  const DEFAULT_CATEGORIES: Category[] = ["Work", "$", "Travel", "Misc"];
 
   return { categories, DEFAULT_CATEGORIES };
 };
