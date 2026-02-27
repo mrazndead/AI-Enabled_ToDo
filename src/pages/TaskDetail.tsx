@@ -1,7 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ChevronLeft, Trash2, Calendar, Tag, CheckCircle2, ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ChevronLeft, Trash2, Calendar, ChevronDown, List, Save, X } from "lucide-react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useCategories, Category } from "@/hooks/useCategories";
 import { format } from "date-fns";
@@ -23,6 +22,9 @@ const TaskDetail = () => {
   const { categories } = useCategories();
   const [todos, setTodos] = useLocalStorage<Todo[]>("dyad-todo-tasks", []);
   const [isChangingCategory, setIsChangingCategory] = useState(false);
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const [editedNotes, setEditedNotes] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const task = useMemo(() => todos.find((t) => t.id === id), [id, todos]);
 
@@ -43,6 +45,39 @@ const TaskDetail = () => {
     setTodos(todos.map((t) => t.id === id ? { ...t, category: newCategory } : t));
     setIsChangingCategory(false);
     showSuccess(`MOVED TO ${newCategory.toUpperCase()}!`);
+  };
+
+  const startEditing = () => {
+    setEditedNotes(task.description || "");
+    setIsEditingNotes(true);
+  };
+
+  const saveNotes = () => {
+    setTodos(todos.map((t) => t.id === id ? { ...t, description: editedNotes } : t));
+    setIsEditingNotes(false);
+    showSuccess("NOTES SAVED!");
+  };
+
+  const addBullet = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = editedNotes;
+    const before = text.substring(0, start);
+    const after = text.substring(end);
+    
+    // Add bullet at start of current line or cursor
+    const newText = before + (before.endsWith('\n') || before === "" ? "• " : "\n• ") + after;
+    setEditedNotes(newText);
+    
+    // Refocus and set cursor position after the bullet
+    setTimeout(() => {
+      textarea.focus();
+      const newPos = start + (before.endsWith('\n') || before === "" ? 2 : 3);
+      textarea.setSelectionRange(newPos, newPos);
+    }, 0);
   };
 
   return (
@@ -110,11 +145,54 @@ const TaskDetail = () => {
             </div>
           </section>
 
-          <section className="bg-white border-4 border-black brutalist-shadow p-8 min-h-[200px]">
-            <h3 className="text-xs font-black uppercase mb-4 border-b-4 border-black pb-2 inline-block">Notes_</h3>
-            <p className="text-xl font-bold leading-relaxed">
-              {task.description || "NO NOTES PROVIDED."}
-            </p>
+          <section className="bg-white border-4 border-black brutalist-shadow p-8 min-h-[250px] relative">
+            <div className="flex justify-between items-center mb-4 border-b-4 border-black pb-2">
+              <h3 className="text-xs font-black uppercase inline-block">Notes_</h3>
+              {!isEditingNotes ? (
+                <button 
+                  onClick={startEditing}
+                  className="text-[10px] font-black uppercase bg-black text-white px-2 py-1 hover:bg-zinc-800 transition-colors"
+                >
+                  EDIT_
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <button 
+                    onClick={addBullet}
+                    className="text-[10px] font-black uppercase bg-[#00FFFF] border-2 border-black px-2 py-1 hover:translate-x-[1px] hover:translate-y-[1px] transition-all"
+                  >
+                    BULLET_
+                  </button>
+                  <button 
+                    onClick={saveNotes}
+                    className="text-[10px] font-black uppercase bg-[#00FF00] border-2 border-black px-2 py-1 hover:translate-x-[1px] hover:translate-y-[1px] transition-all"
+                  >
+                    SAVE_
+                  </button>
+                  <button 
+                    onClick={() => setIsEditingNotes(false)}
+                    className="text-[10px] font-black uppercase bg-[#FF0000] text-white border-2 border-black px-2 py-1 hover:translate-x-[1px] hover:translate-y-[1px] transition-all"
+                  >
+                    CANCEL_
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {isEditingNotes ? (
+              <textarea
+                ref={textareaRef}
+                value={editedNotes}
+                onChange={(e) => setEditedNotes(e.target.value)}
+                className="w-full h-48 p-0 text-xl font-bold leading-relaxed border-none focus:ring-0 resize-none bg-transparent"
+                placeholder="ADD NOTES..."
+                autoFocus
+              />
+            ) : (
+              <p className="text-xl font-bold leading-relaxed whitespace-pre-wrap">
+                {task.description || "NO NOTES PROVIDED."}
+              </p>
+            )}
           </section>
         </main>
 
