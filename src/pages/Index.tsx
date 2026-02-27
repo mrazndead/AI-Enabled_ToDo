@@ -36,18 +36,13 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-[#F4F4F4] p-4 sm:p-8">
       <div className="max-w-2xl mx-auto space-y-8">
-        <div className="bg-[#FFE600] border-4 border-black p-6 brutalist-shadow">
-          <h1 className="text-4xl font-black uppercase italic tracking-tighter">Tasks_</h1>
-          <p className="font-bold text-sm mt-1">Don't forget. Just do it.</p>
-        </div>
-
         <header className="space-y-4">
           <div className="relative">
             <Input 
               placeholder="SEARCH TASKS..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-white border-4 border-black brutalist-shadow-sm h-14 pl-4 text-lg font-black placeholder:text-zinc-400 focus-visible:ring-0 focus-visible:translate-x-[2px] focus-visible:translate-y-[2px] focus-visible:shadow-none transition-all"
+              className="bg-[#FFE600] border-4 border-black brutalist-shadow-sm h-14 pl-4 text-lg font-black placeholder:text-black/40 focus-visible:ring-0 focus-visible:translate-x-[2px] focus-visible:translate-y-[2px] focus-visible:shadow-none transition-all"
             />
           </div>
 
@@ -88,7 +83,7 @@ const Index = () => {
           )}
         </main>
 
-        <div className="fixed bottom-[42px] right-8 z-50">
+        <div className="fixed bottom-[52px] right-8 z-50">
           <Link to="/add">
             <button className="h-16 w-16 bg-[#00FF00] border-4 border-black brutalist-shadow flex items-center justify-center hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
               <Plus className="h-10 w-10 text-black stroke-[3]" />
