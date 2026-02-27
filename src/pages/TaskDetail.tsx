@@ -1,9 +1,9 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ChevronLeft, Trash2, Calendar, Tag, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, Trash2, Calendar, Tag, CheckCircle2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { Category } from "@/hooks/useCategories";
+import { useCategories, Category } from "@/hooks/useCategories";
 import { format } from "date-fns";
 import { showSuccess } from "@/utils/toast";
 import { cn } from "@/lib/utils";
@@ -20,7 +20,9 @@ interface Todo {
 const TaskDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { categories } = useCategories();
   const [todos, setTodos] = useLocalStorage<Todo[]>("dyad-todo-tasks", []);
+  const [isChangingCategory, setIsChangingCategory] = useState(false);
 
   const task = useMemo(() => todos.find((t) => t.id === id), [id, todos]);
 
@@ -35,6 +37,12 @@ const TaskDetail = () => {
     setTodos(todos.filter((t) => t.id !== id));
     showSuccess("TASK AXED!");
     navigate("/");
+  };
+
+  const handleCategoryChange = (newCategory: Category) => {
+    setTodos(todos.map((t) => t.id === id ? { ...t, category: newCategory } : t));
+    setIsChangingCategory(false);
+    showSuccess(`MOVED TO ${newCategory.toUpperCase()}!`);
   };
 
   return (
@@ -58,15 +66,43 @@ const TaskDetail = () => {
         <main className="space-y-10">
           <section className="bg-[#FFE600] border-4 border-black p-8 brutalist-shadow">
             <h2 className={cn(
-              "text-4xl font-black uppercase italic leading-none mb-4",
+              "text-4xl font-black uppercase italic leading-none mb-6",
               task.completed && "line-through decoration-[8px]"
             )}>
               {task.title}
             </h2>
-            <div className="flex items-center gap-4">
-               <span className="bg-black text-white px-3 py-1 font-black uppercase text-xs">
-                {task.category}
-              </span>
+            
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="relative">
+                <button 
+                  onClick={() => setIsChangingCategory(!isChangingCategory)}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-1 font-black uppercase text-xs border-2 border-black transition-all",
+                    isChangingCategory ? "bg-white text-black" : "bg-black text-white hover:bg-zinc-800"
+                  )}
+                >
+                  {task.category}
+                  <ChevronDown className={cn("h-3 w-3 transition-transform", isChangingCategory && "rotate-180")} />
+                </button>
+
+                {isChangingCategory && (
+                  <div className="absolute top-full left-0 mt-2 z-10 bg-white border-4 border-black brutalist-shadow-sm flex flex-col min-w-[120px]">
+                    {categories.map((cat) => (
+                      <button
+                        key={cat}
+                        onClick={() => handleCategoryChange(cat)}
+                        className={cn(
+                          "px-4 py-2 text-left font-black uppercase text-xs border-b-2 border-black last:border-b-0 hover:bg-[#00FFFF] transition-colors",
+                          task.category === cat && "bg-zinc-100"
+                        )}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <span className="font-black uppercase text-xs flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
                 {task.dueDate ? format(new Date(task.dueDate), 'MMMM do, yyyy') : 'NO DATE'}
